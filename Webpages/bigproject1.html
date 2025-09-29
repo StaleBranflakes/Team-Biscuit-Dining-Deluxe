@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dining Deluxe</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(120deg, #e0ffe0 0%, #f5f5f5 100%);
+    }
+    .carousel-outer {
+      width: 70vw;
+      overflow: hidden;
+      border: 8px solid #333;
+      border-radius: 32px; /* Rounded corners for a square-ish shape */
+      background: #f5f5f5;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      margin: auto;
+      padding: 20px 0;
+    }
+    .carousel-container {
+      display: flex;
+      gap: 24px;
+      width: max-content;
+      animation: scroll-carousel 20s linear infinite;
+    }
+    .carousel-btn {
+      display: inline-block;
+      padding: 18px 36px;
+      font-size: 1.2em;
+      background: #506b56;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+      white-space: nowrap;
+      text-align: center;
+    }
+    .carousel-btn img {
+      display: block;
+      margin: 0 auto 8px auto;
+      width: 250px;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #fff;
+    }
+    .carousel-btn ul {
+      text-align: left;
+      margin: 16px 0 0 0;
+      padding-left: 32px;
+      line-height: 1.6;
+      font-size: 0.9em;
+      color: #fff;
+      list-style-type: disc;
+    }
+    .carousel-btn:hover {
+      background: #7ba584;
+      color: #fff;
+    }
+    @keyframes scroll-carousel {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align:center; font-size:2.5em; color:#506b56; margin-bottom:0;">Dining Deluxe</h1>
+<p style="text-align:center; font-size:1.2em; color:#333; margin-top:0;">Remove the Mystery from Dining at UNCP</p>
+  <div class="carousel-outer">
+    <div class="carousel-container" id="carousel">
+      <a href="https://example.com/1" class="carousel-btn">
+        <img src="food.jpg" alt="Button 1">
+        <ul>
+          <li>Spaghetti and Meatballs</li>
+          <li>Calories: 320</li>
+          <li>Has: gluten, meat</li>
+          <li>Hasn't: dairy</li>
+        </ul>
+      </a>
+      <a href="https://example.com/2" class="carousel-btn">
+        <img src="gluten.jpg" alt="Button 2">
+        <ul>
+          <li>Tofu</li>
+          <li>Calories: 30</li>
+          <li>Has: animal product</li>
+          <li>Hasn't: gluten, dairy, meat</li>
+        </ul>
+      </a>
+      <a href="https://example.com/3" class="carousel-btn">
+        <img src="vegan.jpg" alt="Button 3">
+        <ul>
+          <li>Vegetable Medley</li>
+          <li>Calories: 30</li>
+          <li>Has: vegetables</li>
+          <li>Hasn't: animal product, gluten</li>
+        </ul>
+      </a>
+      <a href="https://example.com/4" class="carousel-btn">
+        <img src="allergen.jpg" alt="Button 4">
+        <ul>
+          <li>Crab</li>
+          <li>Calories: 200</li>
+          <li>Has: crab</li>
+          <li>Hasn't: dairy, gluten</li>
+        </ul>
+      </a>
+      <a href="https://example.com/1" class="carousel-btn">
+        <img src="food.jpg" alt="Button 1">
+        <ul>
+          <li>Spaghetti and Meatballs</li>
+          <li>Calories: 320</li>
+          <li>Has: gluten, meat</li>
+          <li>Hasn't: dairy</li>
+        </ul>
+      </a>
+      <a href="https://example.com/2" class="carousel-btn">
+        <img src="gluten.jpg" alt="Button 2">
+        <ul>
+          <li>Tofu</li>
+          <li>Calories: 30</li>
+          <li>Has: animal product</li>
+          <li>Hasn't: gluten, dairy, meat</li>
+        </ul>
+      </a>
+      <a href="https://example.com/3" class="carousel-btn">
+        <img src="vegan.jpg" alt="Button 3">
+        <ul>
+          <li>Vegetable Medley</li>
+          <li>Calories: 30</li>
+          <li>Has: vegetables</li>
+          <li>Hasn't: animal product, gluten</li>
+        </ul>
+      </a>
+      <a href="https://example.com/4" class="carousel-btn">
+        <img src="allergen.jpg" alt="Button 4">
+        <ul>
+          <li>Crab</li>
+          <li>Calories: 200</li>
+          <li>Has: crab</li>
+          <li>Hasn't: dairy, gluten</li>
+        </ul>
+      </a>
+    </div>
+  </div>
+</body>
+</html>
