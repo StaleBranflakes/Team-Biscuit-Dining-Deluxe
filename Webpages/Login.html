@@ -38,16 +38,17 @@
     <div class="login-container">
 
         <h2>Login</h2>
-        <form action="/submit-login.php" method="POST">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
+        <form action="/assets/PHP Scripts/submit-login.php" method="POST">
+            <div> <label for="username">Username:</label> </div>
+            <div><input type="text" id="username" name="username" required></div> 
 
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
+            <div><label for="password">Password:</label></div>
+            <div><input type="password" id="password" name="password" required></div>
 
-            <button type="submit" >Login</button>
-            <button type="reset">Reset</button>
-            <p>Don't have an account? <a href="Register.html">Register here</a></p>
+            <div><button type="submit" >Login</button></div>
+            <div><button type="reset">Reset</button></div>
+
+            <div><p>Don't have an account? <a href="Register.html">Register here</a></p></div>
 
         </form>
     </div>
