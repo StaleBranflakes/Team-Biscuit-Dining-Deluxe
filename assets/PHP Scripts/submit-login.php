@@ -25,5 +25,6 @@
     $pw1    = $conID->real_escape_string($pw1);
 
     $sql = "SELECT * FROM users WHERE uName = '$uName1' AND password = 'XXXX'";
-    
+    $result = $conID->query($sql);
+     
 ?>
