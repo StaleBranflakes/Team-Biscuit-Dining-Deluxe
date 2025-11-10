@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+
+    <link rel="stylesheet" href="/assets/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="/assets/css/noscript.css">
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/browser.min.js"></script>
+    <script src="/assets/js/breakpoints.min.js"></script>
+    <script src="/assets/js/util.js"></script>
+    <script src="/assets/js/main.js"></script>
+
+</head>
+
+<body>
+    <header>
+        <a href="Home.html" class="title">UNCP Dining Deluxe</a>
+        <nav>
+            <ul>
+                <li><a href="Home.html">Home</a></li>
+                <li><a href="Menu.html" class="active">Menu</a></li>
+                <li><a href="About.html">About</a></li>
+                <li><a href="Login.html">Login</a></li>
+                <li><a href="Contact.html">Contact</a></li>
+            </ul>
+    </header>
+    <main>
+        <table>
+            <tr>
+                <title> Register Here</title>
+
+                
+            </tr>
+            <tr>
+                <form action="/assets/PHP Scripts/register_user.php" method="POST">
+                    <div>
+                        <label for="username">Username:</label> 
+                        
+                    </div>
+                    <div>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+
+                    <div>
+                        <label for="password">Password:</label>
+                    </div>
+                    <div>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+
+                    <div>
+                        <button type="submit">Register</button>
+                    </div>
+
+                </form>
+        </table>
+    </main>
+
+		<!-- Footer -->
+		<footer id="footer" class="wrapper alt">
+				<div class="inner">
+					<ul class="menu">
+						<li>&copy; Biscuit inc. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+					</ul>
+				</div>
+		</footer>    
+</body>
+
+</html>
