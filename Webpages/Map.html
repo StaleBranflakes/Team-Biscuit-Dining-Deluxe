@@ -1,0 +1,1128 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Map — Mobile</title>
+    <style>
+        :root {
+            --bg: #f2f4f7;
+            --card: #ffffff;
+            --accent: #5b21b6;
+            --muted: #6b7280;
+            --border: #e6e9ee;
+        }
+
+        html,body { height:100%; margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; background:var(--bg); color:#3d1a5f; }
+
+        .container { max-width:720px; margin:0 auto; }
+
+        /* Top rectangular box */
+        .header-box{
+            box-sizing:border-box;
+            width:100%;
+            padding:12px;
+            background: #99985b;
+            border-bottom:1px solid var(--border);
+            box-shadow: 0 2px 6px rgba(10,20,30,0.06);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        .header-row{
+            display:flex;
+            gap:8px;
+            align-items:center;
+            justify-content:space-between;
+            margin-bottom:10px;
+            flex-wrap: wrap;
+        }
+
+        .title-btn{
+            flex:1;
+            background:var(--accent);
+            color:#fff;
+            border: none;
+            padding:10px 12px;
+            border-radius:10px;
+            font-weight:600;
+            font-size:16px;
+        }
+
+        .search-btn{
+            background:var(--card);
+            color:var(--accent);
+            border:1px solid var(--accent);
+            padding:10px 12px;
+            border-radius:10px;
+            font-weight:600;
+            font-size:16px;
+        }
+
+        /* Search box (hidden by default) */
+        .search-box {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 8px;
+        }
+
+        .search-box.hidden { display: none; }
+
+        .search-input {
+            border: 1px solid var(--border);
+            background: var(--card);
+            padding: 8px 10px;
+            border-radius: 10px;
+            font-size: 14px;
+            min-width: 180px;
+            outline: none;
+            color: inherit;
+        }
+
+        .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(91,33,182,0.12);
+            border-color: var(--accent);
+        }
+
+        /* Tag button list shown when search opens */
+        .tag-list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-left: 8px;
+            align-items: center;
+        }
+
+        .tag-list.hidden { display: none; }
+
+        .tag-btn {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .tag-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: rgba(91,33,182,0.9);
+            box-shadow: 0 2px 6px rgba(91,33,182,0.12);
+        }
+
+        /* Tags for food items */
+        .tags {
+            margin-top: 6px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tag {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            line-height: 1;
+        }
+
+        .item-hidden { display: none; }
+
+        /* Modal overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #0b2b4a;
+        }
+
+        .modal-form-group {
+            margin-bottom: 16px;
+        }
+
+        .modal-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #3d1a5f;
+        }
+
+        .modal-input {
+            width: 100%;
+            border: 1px solid var(--border);
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .modal-input:focus {
+            box-shadow: 0 0 0 3px rgba(91,33,182,0.12);
+            border-color: var(--accent);
+        }
+
+        .modal-tags-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .modal-tag-btn {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-tag-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .modal-tag-btn.selected {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn-submit {
+            background: var(--accent);
+            color: white;
+        }
+
+        .modal-btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(91, 33, 182, 0.2);
+        }
+
+        .modal-btn-submit:disabled {
+            background: #d1d5db;
+            color: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .modal-btn-submit:disabled:hover {
+            background: #d1d5db;
+            transform: none;
+        }
+
+        .modal-btn-cancel {
+            background: var(--bg);
+            color: #3d1a5f;
+            border: 1px solid var(--border);
+        }
+
+        .modal-btn-cancel:hover {
+            background: var(--border);
+        }
+
+        /* Locations: 2 columns on most phones, single column on very narrow */
+        .location-list{
+            display:grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap:8px;
+            list-style:none;
+            padding:0;
+            margin:0;
+        }
+
+        .location-list li{
+            background:var(--card);
+            border:1px solid var(--border);
+            padding:10px;
+            border-radius:10px;
+            font-size:14px;
+            text-align:center;
+        }
+
+        .location-list {
+            background: #99985b;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .location-toggle-btn {
+            display: none;
+        }
+
+        @media (max-width:600px){
+            .location-toggle-btn {
+                display: inline-block;
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                background: var(--accent);
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 6px 10px;
+                font-size: 16px;
+                cursor: pointer;
+                z-index: 25;
+            }
+
+            .location-list.collapsed {
+                display: none;
+            }
+            .search-box, .tag-list {
+                width: 100%;
+                margin-left: 0;
+                order: 10;
+                flex-basis: 100%;
+            }
+        }
+
+        @media (max-width:360px){
+            .header-row{ flex-direction:column; align-items:stretch; }
+            .title-btn, .search-btn{ width:100%; }
+            .location-list{ grid-template-columns: 1fr; }
+            .search-box { margin-left: 0; width: 100%; }
+            .tag-list { margin-left: 0; width: 100%; }
+        }
+
+        /* Map styles */
+        main { 
+            padding: 16px;
+            padding-bottom: 180px; /* Make room for bottom menu */
+        }
+
+        .map-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            margin: 20px auto;
+            background: var(--card);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .map-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .map-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: transparent;
+            border: 2px solid var(--accent);
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .map-marker::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0);
+            transition: all 0.3s ease;
+        }
+
+        .map-marker.active {
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(91, 33, 182, 0.3);
+        }
+
+        .map-marker.active::after {
+            opacity: 0.2;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* Desktop / wide layout: left vertical controls, center map, right vertical menu */
+        @media (min-width: 901px) {
+            body { display: block; }
+
+            html, body {
+                overflow: hidden;
+            }
+            
+            .container {
+                display: grid;
+                grid-template-columns: 260px 1fr 240px;
+                gap: 16px;
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 16px;
+                height: 100vh;
+            }
+
+            /* Left column: header-box becomes a vertical panel */
+            .header-box {
+                position: relative;
+                height: calc(100vh - 32px);
+                overflow-y: auto;
+                border-right: 1px solid var(--border);
+                box-shadow: none;
+                padding: 16px;
+            }
+
+            .header-row { flex-direction: column; gap: 12px; }
+            .location-list { display: block; }
+            .location-list li { margin-bottom: 10px; }
+
+            /* Center: map area larger and full height */
+            main { 
+                padding: 0;
+                height: calc(100vh - 32px);
+            }
+            .map-container { 
+                margin: 0;
+                aspect-ratio: auto;
+                height: 100%;
+                border-radius: 8px;
+            }
+
+            /* Right column: bottom-menu becomes a vertical panel */
+            .bottom-menu {
+                position: relative;
+                height: calc(100vh - 32px);
+                overflow-y: auto;
+                padding: 16px;
+                border-top: none;
+                border-left: 1px solid var(--border);
+                box-shadow: none;
+                background: #99985b;
+            }
+
+            /* Stack menu items vertically in the right panel */
+            .menu-array {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                padding-bottom: 0;
+                overflow: visible;
+            }
+
+            .menu-item {
+                flex: none;
+                width: auto;
+                text-align: left;
+                white-space: normal;
+                background: var(--bg);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 12px 20px;
+            }
+            /* Keep the global menu header sticky at the top of the right panel */
+            .menu-header {
+                position: sticky;
+                top: 0;
+                z-index: 6;
+                background: transparent;
+                padding-bottom: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header-box" role="banner" aria-label="Map controls">
+            <div class="header-row">
+                <button class="title-btn" type="button" aria-label="Title button">Dining Deluxe - Map</button>
+                <button class="search-btn" type="button" aria-label="Search button">Search</button>
+                <!-- Search box toggled by the Search button -->
+                <div class="search-box hidden" role="search" aria-hidden="true">
+                    <input type="search" class="search-input" placeholder="Search locations..." aria-label="Search locations">
+                </div>
+                <!-- Tag buttons will appear here when search opens -->
+                <div class="tag-list hidden" aria-hidden="true"></div>
+            </div>
+
+            <ul class="location-list" aria-label="Locations list">
+                <li><button class="location-btn">Main Line</button></li>
+                <li><button class="location-btn">The Grill</button></li>
+                <li><button class="location-btn">Pasta & Pizza</button></li>
+                <li><button class="location-btn">Custom Pastas</button></li>
+                <li><button class="location-btn">Drink Line</button></li>
+                <li><button class="location-btn">Salad Bar</button></li>
+                <li><button class="location-btn">Fruit & Yogurt</button></li>
+                <li><button class="location-btn">Sweet Treats</button></li>
+            </ul>
+            <button class="location-toggle-btn" type="button" aria-label="Toggle locations list" aria-expanded="true">▼</button>
+        </header>
+
+        <main>
+            <div class="map-container">
+                <img src="path/to/your/map-image.jpg" alt="Location Map" class="map-image">
+                <!-- Location markers -->
+                <div class="map-marker" data-location="1" style="top: 20%; left: 30%;"></div>
+                <div class="map-marker" data-location="2" style="top: 35%; left: 45%;"></div>
+                <div class="map-marker" data-location="3" style="top: 50%; left: 25%;"></div>
+                <div class="map-marker" data-location="4" style="top: 65%; left: 40%;"></div>
+                <div class="map-marker" data-location="5" style="top: 40%; left: 60%;"></div>
+                <div class="map-marker" data-location="6" style="top: 55%; left: 75%;"></div>
+                <div class="map-marker" data-location="7" style="top: 70%; left: 65%;"></div>
+                <div class="map-marker" data-location="8" style="top: 25%; left: 70%;"></div>
+            </div>
+            
+            <!-- Feedback Modal -->
+            <div class="modal-overlay" id="feedbackModal">
+                <div class="modal-box">
+                    <div class="modal-header">Tell us what's here</div>
+                    
+                    <div class="modal-form-group">
+                        <label class="modal-label">Food Name</label>
+                        <input type="text" class="modal-input" id="foodNameInput" placeholder="Enter food name...">
+                    </div>
+
+                    <div class="modal-form-group">
+                        <label class="modal-label">Select Tags</label>
+                        <div class="modal-tags-list" id="modalTagsList"></div>
+                    </div>
+
+                    <div class="modal-form-group">
+                        <label class="modal-label">Select Location</label>
+                        <div class="modal-tags-list" id="modalLocationsList"></div>
+                    </div>
+
+                    <div class="modal-buttons">
+                        <button class="modal-btn modal-btn-submit" id="modalSubmitBtn">Submit</button>
+                        <button class="modal-btn modal-btn-cancel" id="modalCancelBtn">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+            <div class="bottom-menu">
+                <!-- Global feedback button (separate from arrays) -->
+                <div class="menu-header">
+                    <button id="feedback-global" class="menu-item feedback-btn">Tell us what's here</button>
+                </div>
+
+                <!-- Location Arrays -->
+                <div class="menu-array" id="location1-array">
+                    <div class="menu-item food-item" data-tags="vegetarian,keto">Potatoes
+                        <div class="tags"><span class="tag">Vegetarian</span><span class="tag">Keto</span></div>
+                    </div>
+                    <div class="menu-item food-item" data-tags="pork,contains-gluten">Porkchops
+                        <div class="tags"><span class="tag">Pork</span><span class="tag">Contains-Gluten</span></div>
+                    </div>
+                    <div class="menu-item food-item" data-tags="vegan,gluten-free">Tofu
+                        <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
+                    </div>
+                </div>
+                
+                <div class="menu-array hidden" id="location2-array">
+                    <div class="menu-item food-item" data-tags="beef,contains-dairy">Cheeseburger
+                        <div class="tags"><span class="tag">Beef</span><span class="tag">Contains-Dairy</span></div>
+                    </div>
+                    <div class="menu-item food-item" data-tags="pork">Hotdog
+                        <div class="tags"><span class="tag">Pork</span></div>
+                    </div>
+                    <div class="menu-item food-item" data-tags="vegan,vegetarian">Fries
+                        <div class="tags"><span class="tag">Vegan</span><span class="tag">Vegetarian</span></div>
+                    </div>
+                </div>
+
+                <div class="menu-array hidden" id="location3-array">
+                    <div class="menu-item food-item" data-tags="contains-gluten,contains-dairy">Pineapple Pizza
+                        <div class="tags"><span class="tag">Contains-Gluten</span><span class="tag">Contains-Dairy</span></div>
+                    </div>
+                    <div class="menu-item food-item" data-tags="contains-meat,contains-gluten">Sausage Pizza
+                        <div class="tags"><span class="tag">Contains-Meat</span><span class="tag">Contains-Gluten</span></div>
+                    </div>
+                    <div class="menu-item food-item" data-tags="contains-meat,contains-gluten">Stromboli
+                        <div class="tags"><span class="tag">Contains-Meat</span><span class="tag">Contains-Gluten</span></div>
+                    </div>
+                </div>
+
+                <div class="menu-array hidden" id="location4-array">
+                    <div class="menu-item food-item" data-tags="chicken,high-protein">Chicken Cuts
+                        <div class="tags"><span class="tag">Chicken</span><span class="tag">High-Protein</span></div>
+                    </div>
+                    <div class="menu-item food-item" data-tags="vegetarian,vegan,gluten-free">Cauliflour
+                        <div class="tags"><span class="tag">Vegetarian</span><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
+                    </div>
+                    <div class="menu-item food-item" data-tags="contains-dairy,vegetarian">Alfredo Sauce
+                        <div class="tags"><span class="tag">Contains-Dairy</span><span class="tag">Vegetarian</span></div>
+                    </div>
+                </div>
+
+                <div class="menu-array hidden" id="location5-array">
+                    <div class="menu-item food-item" data-tags="contains-dairy">Milk
+                        <div class="tags"><span class="tag">Contains-Dairy</span></div>
+                    </div>
+                    <div class="menu-item food-item" data-tags="vegan,gluten-free">Apple Juice
+                        <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
+                    </div>
+                    <div class="menu-item food-item" data-tags="vegan,gluten-free">Gatorade
+                        <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
+                    </div>
+                </div>
+
+                <div class="menu-array hidden" id="location6-array">
+                    <div class="menu-item food-item" data-tags="vegan,gluten-free">Lettuce
+                        <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
+                    </div>
+                    <div class="menu-item food-item" data-tags="vegan,gluten-free">Cucumbers
+                        <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
+                    </div>
+                    <div class="menu-item food-item" data-tags="contains-gluten,vegetarian">Croutons
+                        <div class="tags"><span class="tag">Contains-Gluten</span><span class="tag">Vegetarian</span></div>
+                    </div>
+                </div>
+
+                <div class="menu-array hidden" id="location7-array">
+                    <div class="menu-item food-item" data-tags="vegan,gluten-free">Cantaloupe
+                        <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
+                    </div>
+                    <div class="menu-item food-item" data-tags="contains-dairy,vegetarian">Strawberry Yogurt
+                        <div class="tags"><span class="tag">Contains-Dairy</span><span class="tag">Vegetarian</span></div>
+                    </div>
+                    <div class="menu-item food-item" data-tags="vegan">Frozen Bananas
+                        <div class="tags"><span class="tag">Vegan</span></div>
+                    </div>
+                </div>
+
+                <div class="menu-array hidden" id="location8-array">
+                    <div class="menu-item food-item" data-tags="contains-gluten,contains-dairy">Brownies
+                        <div class="tags"><span class="tag">Contains-Gluten</span><span class="tag">Contains-Dairy</span></div>
+                    </div>
+                    <div class="menu-item food-item" data-tags="contains-gluten,vegetarian">Oatmeal Rasin Cookies
+                        <div class="tags"><span class="tag">Contains-Gluten</span><span class="tag">Vegetarian</span></div>
+                    </div>
+                    <div class="menu-item food-item" data-tags="contains-gluten,contains-dairy">Cake Cuts
+                        <div class="tags"><span class="tag">Contains-Gluten</span><span class="tag">Contains-Dairy</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                /* Mobile-specific layout for bottom menu (fixed at bottom) */
+                @media (max-width: 600px) {
+                    .bottom-menu {
+                        position: fixed;
+                        bottom: 0;
+                        left: 0;
+                        right: 0;
+                        background: #99985b;
+                        padding: 16px;
+                        border-top: 1px solid var(--border);
+                        box-shadow: 0 -2px 6px rgba(10,20,30,0.06);
+                        display: flex;
+                        gap: 12px;
+                        overflow-x: auto;
+                    }
+
+                    .menu-header {
+                        flex: 0 0 auto;
+                    }
+
+                    .menu-array {
+                        display: flex;
+                        flex-direction: row;
+                        gap: 12px;
+                        flex: 0 0 auto;
+                        padding-bottom: 0;
+                    }
+
+                    .menu-item {
+                        flex: 0 0 auto;
+                        padding: 12px 20px;
+                        background: var(--bg);
+                        border: 1px solid var(--border);
+                        border-radius: 8px;
+                        white-space: nowrap;
+                    }
+                }
+
+                .hidden {
+                    display: none;
+                }
+
+                .location-btn {
+                    width: 100%;
+                    padding: 10px 12px;
+                    border: none;
+                    background: var(--card);
+                    cursor: pointer;
+                    font-size: 14px;
+                    color: var(--accent);
+                    border-radius: 10px;
+                    font-weight: 500;
+                    transition: all 0.2s ease;
+                }
+
+                .location-btn:hover {
+                    background: var(--bg);
+                    transform: translateY(-1px);
+                }
+
+                .location-btn.active {
+                    background: var(--accent);
+                    color: white;
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 4px rgba(91, 33, 182, 0.2);
+                }
+
+                .feedback-btn {
+                    background: #ff3b30 !important;
+                    color: white !important;
+                    font-weight: 600;
+                    cursor: pointer;
+                    border: none !important;
+                    transition: all 0.2s ease;
+                }
+
+                .feedback-btn:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 4px rgba(255, 59, 48, 0.2);
+                }
+
+                .feedback-btn:active {
+                    transform: translateY(0);
+                }
+            </style>
+
+            <script>
+                // Get all elements
+                const locationButtons = document.querySelectorAll('.location-btn');
+                const menuArrays = document.querySelectorAll('.menu-array');
+                const mapMarkers = document.querySelectorAll('.map-marker');
+                const locationToggleBtn = document.querySelector('.location-toggle-btn');
+                const locationList = document.querySelector('.location-list');
+                const feedbackBtn = document.getElementById('feedback-global');
+                const feedbackModal = document.getElementById('feedbackModal');
+                const modalCancelBtn = document.getElementById('modalCancelBtn');
+                const modalSubmitBtn = document.getElementById('modalSubmitBtn');
+                const foodNameInput = document.getElementById('foodNameInput');
+                const modalTagsList = document.getElementById('modalTagsList');
+                const modalLocationsList = document.getElementById('modalLocationsList');
+
+                // Search elements
+                const searchBtn = document.querySelector('.search-btn');
+                const searchBox = document.querySelector('.search-box');
+                const searchInput = document.querySelector('.search-input');
+                const tagListEl = document.querySelector('.tag-list');
+
+                // Tag selection state
+                const selectedTags = new Set();
+                const modalSelectedTags = new Set();
+                let modalSelectedLocation = null;
+                let allTags = []; // list of available tag keys
+
+                // Function to validate form
+                function validateModalForm() {
+                    const hasName = foodNameInput.value.trim().length > 0;
+                    const hasTags = modalSelectedTags.size > 0;
+                    const hasLocation = modalSelectedLocation !== null;
+                    const isValid = hasName && hasTags && hasLocation;
+                    modalSubmitBtn.disabled = !isValid;
+                }
+
+                // Feedback button opens modal
+                if (feedbackBtn && feedbackModal) {
+                    feedbackBtn.addEventListener('click', () => {
+                        feedbackModal.classList.add('active');
+                        foodNameInput.focus();
+                        // Build modal tag list if not already built
+                        if (modalTagsList.children.length === 0) {
+                            buildModalTagList();
+                            buildModalLocationList();
+                        }
+                        validateModalForm();
+                    });
+                }
+
+                // Add input event listener to food name input
+                if (foodNameInput) {
+                    foodNameInput.addEventListener('input', () => {
+                        validateModalForm();
+                    });
+                }
+
+                // Modal cancel button
+                if (modalCancelBtn && feedbackModal) {
+                    modalCancelBtn.addEventListener('click', () => {
+                        feedbackModal.classList.remove('active');
+                        foodNameInput.value = '';
+                        modalSelectedTags.clear();
+                        modalSelectedLocation = null;
+                        document.querySelectorAll('.modal-tag-btn').forEach(btn => btn.classList.remove('selected'));
+                        document.querySelectorAll('.modal-location-btn').forEach(btn => btn.classList.remove('selected'));
+                    });
+                }
+
+                // Close modal when clicking outside
+                if (feedbackModal) {
+                    feedbackModal.addEventListener('click', (e) => {
+                        if (e.target === feedbackModal) {
+                            feedbackModal.classList.remove('active');
+                            foodNameInput.value = '';
+                            modalSelectedTags.clear();
+                            modalSelectedLocation = null;
+                            document.querySelectorAll('.modal-tag-btn').forEach(btn => btn.classList.remove('selected'));
+                            document.querySelectorAll('.modal-location-btn').forEach(btn => btn.classList.remove('selected'));
+                        }
+                    });
+                }
+
+                // Modal submit button
+                if (modalSubmitBtn) {
+                    modalSubmitBtn.addEventListener('click', () => {
+                        const foodName = foodNameInput.value.trim();
+                        const selectedTagsArray = Array.from(modalSelectedTags);
+                        const locationIndex = modalSelectedLocation;
+
+                        if (foodName && selectedTagsArray.length > 0 && locationIndex !== null) {
+                            // Create new food item
+                            const newFoodItem = document.createElement('div');
+                            newFoodItem.className = 'menu-item food-item';
+                            newFoodItem.dataset.tags = selectedTagsArray.join(',');
+                            
+                            // Build tags HTML
+                            const tagsHtml = selectedTagsArray.map(tag => {
+                                const label = tag.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                                return `<span class="tag">${label}</span>`;
+                            }).join('');
+
+                            newFoodItem.innerHTML = `${foodName}
+                                <div class="tags">${tagsHtml}</div>`;
+
+                            // Add to the correct location array
+                            const targetArray = document.getElementById(`location${locationIndex + 1}-array`);
+                            if (targetArray) {
+                                targetArray.appendChild(newFoodItem);
+                            }
+
+                            // Close modal and reset
+                            feedbackModal.classList.remove('active');
+                            foodNameInput.value = '';
+                            modalSelectedTags.clear();
+                            modalSelectedLocation = null;
+                            document.querySelectorAll('.modal-tag-btn').forEach(btn => btn.classList.remove('selected'));
+                            document.querySelectorAll('.modal-location-btn').forEach(btn => btn.classList.remove('selected'));
+                            validateModalForm();
+                        }
+                    });
+                }
+
+                // Build tag list for modal
+                function buildModalTagList() {
+                    const tagSet = new Set();
+                    document.querySelectorAll('.food-item').forEach(it => {
+                        const tags = (it.dataset.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+                        tags.forEach(t => tagSet.add(t));
+                    });
+
+                    allTags = Array.from(tagSet).sort();
+                    allTags.forEach(tagKey => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'modal-tag-btn';
+                        btn.dataset.tag = tagKey;
+                        const label = tagKey.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                        btn.textContent = label;
+                        btn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            if (modalSelectedTags.has(tagKey)) {
+                                modalSelectedTags.delete(tagKey);
+                                btn.classList.remove('selected');
+                            } else {
+                                modalSelectedTags.add(tagKey);
+                                btn.classList.add('selected');
+                            }
+                            validateModalForm();
+                        });
+                        modalTagsList.appendChild(btn);
+                    });
+                }
+
+                // Build location list for modal
+                function buildModalLocationList() {
+                    const locations = ['Main Line', 'The Grill', 'Pasta & Pizza', 'Custom Pastas', 'Drink Line', 'Salad Bar', 'Fruit & Yogurt', 'Sweet Treats'];
+                    
+                    locations.forEach((locName, locIndex) => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'modal-tag-btn modal-location-btn';
+                        btn.dataset.location = locIndex;
+                        btn.textContent = locName;
+                        btn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            // Remove selected from all location buttons
+                            document.querySelectorAll('.modal-location-btn').forEach(b => b.classList.remove('selected'));
+                            // Add selected to clicked button
+                            btn.classList.add('selected');
+                            modalSelectedLocation = locIndex;
+                            validateModalForm();
+                        });
+                        modalLocationsList.appendChild(btn);
+                    });
+                }
+
+                // Location toggle behavior
+                if (locationToggleBtn && locationList) {
+                    locationToggleBtn.addEventListener('click', (e) => {
+                        const isCollapsed = locationList.classList.toggle('collapsed');
+                        locationToggleBtn.setAttribute('aria-expanded', !isCollapsed ? 'true' : 'false');
+                        locationToggleBtn.textContent = isCollapsed ? '▶' : '▼';
+                        e.stopPropagation();
+                    });
+                }
+
+                // Function to hide all arrays
+                function hideAllArrays() {
+                    menuArrays.forEach(array => array.classList.add('hidden'));
+                }
+
+                // Function to remove active state from all buttons
+                function removeActiveState() {
+                    locationButtons.forEach(btn => btn.classList.remove('active'));
+                    mapMarkers.forEach(marker => marker.classList.remove('active'));
+                }
+
+                // Add click event listeners to each location button
+                locationButtons.forEach((button, index) => {
+                    button.addEventListener('click', () => {
+                        // Hide all arrays first
+                        hideAllArrays();
+                        // Remove active state from all buttons and markers
+                        removeActiveState();
+                        
+                        // Show the corresponding array
+                        const arrayId = `location${index + 1}-array`;
+                        const targetArray = document.getElementById(arrayId);
+                        if (targetArray) {
+                            targetArray.classList.remove('hidden');
+                            button.classList.add('active');
+                            
+                            // Activate corresponding map marker
+                            const marker = document.querySelector(`.map-marker[data-location="${index + 1}"]`);
+                            if (marker) {
+                                marker.classList.add('active');
+                                
+                                // Smooth scroll to marker if it's not in view
+                                marker.scrollIntoView({ 
+                                    behavior: 'smooth',
+                                    block: 'center'
+                                });
+                            }
+                        }
+                    });
+                });
+
+                // Search toggle behavior
+                if (searchBtn && searchBox && searchInput && tagListEl) {
+                    searchBtn.addEventListener('click', (e) => {
+                        // Toggle hidden state
+                        const nowHidden = searchBox.classList.toggle('hidden');
+                        searchBox.setAttribute('aria-hidden', nowHidden ? 'true' : 'false');
+
+                        // Toggle tag list visibility together with search box
+                        tagListEl.classList.toggle('hidden', nowHidden);
+                        tagListEl.setAttribute('aria-hidden', nowHidden ? 'true' : 'false');
+
+                        if (!nowHidden) {
+                            // Opened: focus the input and build tag buttons if needed
+                            buildTagButtons();
+                            setTimeout(() => searchInput.focus(), 0);
+                        } else {
+                            // Closed: clear input and clear selected tags
+                            searchInput.value = '';
+                            clearSelectedTags();
+                            // Reset filtering
+                            filterItems();
+                        }
+                        e.stopPropagation();
+                    });
+
+                    // Close search when clicking outside
+                    document.addEventListener('click', (evt) => {
+                        if (!searchBox.classList.contains('hidden')) {
+                            if (!searchBox.contains(evt.target) && !searchBtn.contains(evt.target)) {
+                                searchBox.classList.add('hidden');
+                                searchBox.setAttribute('aria-hidden', 'true');
+                            }
+                        }
+                    });
+
+                    // Close on Escape
+                    searchInput.addEventListener('keydown', (evt) => {
+                        if (evt.key === 'Escape' || evt.key === 'Esc') {
+                            searchBox.classList.add('hidden');
+                            searchBox.setAttribute('aria-hidden', 'true');
+                            searchBtn.focus();
+                        }
+                    });
+                    // Live filtering: match against item text and data-tags
+                    searchInput.addEventListener('input', (evt) => {
+                        filterItems();
+                    });
+
+                    // Build tag buttons from existing items
+                    function buildTagButtons() {
+                        // If already built, do nothing
+                        if (tagListEl.dataset.built === '1') return;
+
+                        const tagSet = new Set();
+                        document.querySelectorAll('.food-item').forEach(it => {
+                            const tags = (it.dataset.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+                            tags.forEach(t => tagSet.add(t));
+                        });
+
+                        allTags = Array.from(tagSet).sort();
+                        tagListEl.innerHTML = '';
+                        allTags.forEach(tagKey => {
+                            const btn = document.createElement('button');
+                            btn.type = 'button';
+                            btn.className = 'tag-btn';
+                            btn.dataset.tag = tagKey;
+                            // Display label: replace hyphens with spaces and Title Case
+                            const label = tagKey.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                            btn.textContent = label;
+                            btn.addEventListener('click', () => {
+                                toggleTagSelection(tagKey, btn);
+                            });
+                            tagListEl.appendChild(btn);
+                        });
+                        tagListEl.dataset.built = '1';
+                    }
+
+                    function toggleTagSelection(tagKey, btn) {
+                        if (selectedTags.has(tagKey)) {
+                            selectedTags.delete(tagKey);
+                            btn.classList.remove('active');
+                        } else {
+                            selectedTags.add(tagKey);
+                            btn.classList.add('active');
+                        }
+                        // When tag selection changes, run filter
+                        filterItems();
+                    }
+
+                    function clearSelectedTags() {
+                        selectedTags.clear();
+                        tagListEl.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+                    }
+
+                    function filterItems() {
+                        const q = (searchInput.value || '').trim().toLowerCase();
+
+                        document.querySelectorAll('.menu-array').forEach(arr => {
+                            const items = Array.from(arr.querySelectorAll('.food-item'));
+                            let anyVisible = false;
+                            items.forEach(it => {
+                                const text = (it.textContent || '').toLowerCase();
+                                const tags = (it.dataset.tags || '').toLowerCase();
+
+                                // Text match
+                                const matchesText = !q || text.includes(q) || tags.split(',').some(t => t.trim().includes(q));
+
+                                // Tag match: if none selected, it's a match; otherwise OR-match any selected tag
+                                let matchesTag = true;
+                                if (selectedTags.size > 0) {
+                                    const itemTags = (it.dataset.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+                                    matchesTag = itemTags.some(t => selectedTags.has(t));
+                                }
+
+                                const show = matchesText && matchesTag;
+                                if (show) {
+                                    it.classList.remove('item-hidden');
+                                    it.style.display = '';
+                                    anyVisible = true;
+                                } else {
+                                    it.classList.add('item-hidden');
+                                    it.style.display = 'none';
+                                }
+                            });
+
+                            // Show or hide the whole array and its corresponding location button
+                            const id = arr.id || '';
+                            const match = id.match(/location(\d+)-array/);
+                            if (!anyVisible) {
+                                arr.classList.add('hidden');
+                                if (match) {
+                                    const idx = parseInt(match[1], 10) - 1;
+                                    if (locationButtons[idx]) locationButtons[idx].style.display = 'none';
+                                }
+                            } else {
+                                arr.classList.remove('hidden');
+                                if (match) {
+                                    const idx = parseInt(match[1], 10) - 1;
+                                    if (locationButtons[idx]) locationButtons[idx].style.display = '';
+                                }
+                            }
+                        });
+                    }
+                }
+
+                // Show the first location's array and marker by default
+                document.getElementById('location1-array').classList.remove('hidden');
+                if (locationButtons[0]) locationButtons[0].classList.add('active');
+                const firstMarker = document.querySelector('.map-marker[data-location="1"]');
+                if (firstMarker) firstMarker.classList.add('active');
+            </script>
+    </div>
+</body>
+</html>
