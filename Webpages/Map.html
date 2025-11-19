@@ -6,11 +6,11 @@
     <title>Map — Mobile</title>
     <style>
         :root {
-            --bg: #f2f4f7;
+            --bg: #312450;
             --card: #ffffff;
-            --accent: #5b21b6;
+            --accent: #b74e91;
             --muted: #6b7280;
-            --border: #e6e9ee;
+            --border: #312450;
         }
 
         html,body { height:100%; margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; background:var(--bg); color:#3d1a5f; }
@@ -22,7 +22,7 @@
             box-sizing:border-box;
             width:100%;
             padding:12px;
-            background: #99985b;
+            background: #5e42a6;
             border-bottom:1px solid var(--border);
             box-shadow: 0 2px 6px rgba(10,20,30,0.06);
             position: sticky;
@@ -61,7 +61,7 @@
             cursor: pointer;
         }
 
-        .filter-btn:hover {
+        .search-btn:hover, .filter-btn:hover {
             background: var(--bg);
         }
 
@@ -128,7 +128,7 @@
         }
 
         .tag {
-            background: var(--bg);
+            background: var(--card);
             border: 1px solid var(--border);
             color: var(--muted);
             padding: 4px 8px;
@@ -272,7 +272,7 @@
 
         .modal-btn-cancel {
             background: var(--bg);
-            color: #3d1a5f;
+            color: #5052b5;
             border: 1px solid var(--border);
         }
 
@@ -379,7 +379,7 @@
         .filter-checkbox-label strong {
             font-size: 14px;
             font-weight: 600;
-            color: #3d1a5f;
+            color: var(--accent);
         }
 
         .filter-checkbox-label small {
@@ -505,7 +505,7 @@
         }
 
         .location-list {
-            background: #99985b;
+            background: #5e42a6;
             padding: 10px;
             border-radius: 10px;
         }
@@ -561,7 +561,6 @@
             aspect-ratio: 1;
             margin: 20px auto;
             background: var(--card);
-            border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
@@ -574,11 +573,11 @@
 
         .map-marker {
             position: absolute;
-            width: 20px;
-            height: 20px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: transparent;
-            border: 2px solid var(--accent);
+            border: 4px solid var(--accent);
             transform: translate(-50%, -50%);
             transition: all 0.3s ease;
             pointer-events: none;
@@ -649,7 +648,6 @@
                 margin: 0;
                 aspect-ratio: auto;
                 height: 100%;
-                border-radius: 8px;
             }
 
             /* Right column: bottom-menu becomes a vertical panel */
@@ -661,7 +659,7 @@
                 border-top: none;
                 border-left: 1px solid var(--border);
                 box-shadow: none;
-                background: #99985b;
+                background: #5e42a6;
             }
 
             /* Stack menu items vertically in the right panel */
@@ -669,7 +667,7 @@
                 display: flex;
                 flex-direction: column;
                 gap: 12px;
-                padding-bottom: 0;
+                margin-bottom: 12px;
                 overflow: visible;
             }
 
@@ -724,16 +722,16 @@
 
         <main>
             <div class="map-container">
-                <img src="path/to/your/map-image.jpg" alt="Location Map" class="map-image">
+                <img src="../Images/Menu Images/diningmap1.png" alt="Location Map" class="map-image">
                 <!-- Location markers -->
-                <div class="map-marker" data-location="1" style="top: 20%; left: 30%;"></div>
-                <div class="map-marker" data-location="2" style="top: 35%; left: 45%;"></div>
-                <div class="map-marker" data-location="3" style="top: 50%; left: 25%;"></div>
-                <div class="map-marker" data-location="4" style="top: 65%; left: 40%;"></div>
-                <div class="map-marker" data-location="5" style="top: 40%; left: 60%;"></div>
-                <div class="map-marker" data-location="6" style="top: 55%; left: 75%;"></div>
+                <div class="map-marker" data-location="1" style="top: 17%; left: 35%;"></div>
+                <div class="map-marker" data-location="2" style="top: 17%; left: 59%;"></div>
+                <div class="map-marker" data-location="3" style="top: 40%; left: 60%;"></div>
+                <div class="map-marker" data-location="4" style="top: 55%; left: 75%;"></div>
+                <div class="map-marker" data-location="5" style="top: 80%; left: 40%;"></div>
+                <div class="map-marker" data-location="6" style="top: 95%; left: 85%;"></div>
                 <div class="map-marker" data-location="7" style="top: 70%; left: 65%;"></div>
-                <div class="map-marker" data-location="8" style="top: 25%; left: 70%;"></div>
+                <div class="map-marker" data-location="8" style="top: 55%; left: 90%;"></div>
             </div>
             
             <!-- Feedback Modal -->
@@ -824,6 +822,9 @@
                     <button id="feedback-global" class="menu-item feedback-btn">Tell us what's here</button>
                 </div>
 
+                <!-- No items available message -->
+                <div id="noItemsMessage" class="no-items-message hidden">No items available.</div>
+
                 <!-- Location Arrays -->
                 <div class="menu-array" id="location1-array">
                     <div class="menu-item food-item" data-tags="vegetarian,keto" data-source="staff">
@@ -836,7 +837,7 @@
                         Porkchops
                         <div class="tags"><span class="tag">Pork</span><span class="tag">Contains-Gluten</span></div>
                     </div>
-                    <div class="menu-item food-item" data-tags="vegan,gluten-free" data-source="staff">
+                    <div class="menu-item food-item" data-tags="vegan,gluten-free" data-source="student">
                         <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
                         Tofu
                         <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
@@ -844,7 +845,7 @@
                 </div>
                 
                 <div class="menu-array hidden" id="location2-array">
-                    <div class="menu-item food-item" data-tags="beef,contains-dairy" data-source="staff">
+                    <div class="menu-item food-item" data-tags="beef,contains-dairy" data-source="guest">
                         <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
                         Cheeseburger
                         <div class="tags"><span class="tag">Beef</span><span class="tag">Contains-Dairy</span></div>
@@ -854,7 +855,7 @@
                         Hotdog
                         <div class="tags"><span class="tag">Pork</span></div>
                     </div>
-                    <div class="menu-item food-item" data-tags="vegan,vegetarian" data-source="staff">
+                    <div class="menu-item food-item" data-tags="vegan,vegetarian" data-source="student">
                         <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
                         Fries
                         <div class="tags"><span class="tag">Vegan</span><span class="tag">Vegetarian</span></div>
@@ -862,17 +863,17 @@
                 </div>
 
                 <div class="menu-array hidden" id="location3-array">
-                    <div class="menu-item food-item" data-tags="contains-gluten,contains-dairy" data-source="staff">
+                    <div class="menu-item food-item" data-tags="contains-gluten,contains-dairy" data-source="guest">
                         <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
                         Pineapple Pizza
                         <div class="tags"><span class="tag">Contains-Gluten</span><span class="tag">Contains-Dairy</span></div>
                     </div>
-                    <div class="menu-item food-item" data-tags="contains-meat,contains-gluten" data-source="staff">
+                    <div class="menu-item food-item" data-tags="contains-meat,contains-gluten" data-source="guest">
                         <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
                         Sausage Pizza
                         <div class="tags"><span class="tag">Contains-Meat</span><span class="tag">Contains-Gluten</span></div>
                     </div>
-                    <div class="menu-item food-item" data-tags="contains-meat,contains-gluten" data-source="staff">
+                    <div class="menu-item food-item" data-tags="contains-meat,contains-gluten" data-source="student">
                         <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
                         Stromboli
                         <div class="tags"><span class="tag">Contains-Meat</span><span class="tag">Contains-Gluten</span></div>
@@ -880,7 +881,7 @@
                 </div>
 
                 <div class="menu-array hidden" id="location4-array">
-                    <div class="menu-item food-item" data-tags="chicken,high-protein" data-source="staff">
+                    <div class="menu-item food-item" data-tags="chicken,high-protein" data-source="guest">
                         <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
                         Chicken Cuts
                         <div class="tags"><span class="tag">Chicken</span><span class="tag">High-Protein</span></div>
@@ -890,7 +891,7 @@
                         Cauliflour
                         <div class="tags"><span class="tag">Vegetarian</span><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
                     </div>
-                    <div class="menu-item food-item" data-tags="contains-dairy,vegetarian" data-source="staff">
+                    <div class="menu-item food-item" data-tags="contains-dairy,vegetarian" data-source="student">
                         <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
                         Alfredo Sauce
                         <div class="tags"><span class="tag">Contains-Dairy</span><span class="tag">Vegetarian</span></div>
@@ -898,7 +899,7 @@
                 </div>
 
                 <div class="menu-array hidden" id="location5-array">
-                    <div class="menu-item food-item" data-tags="contains-dairy" data-source="staff">
+                    <div class="menu-item food-item" data-tags="contains-dairy" data-source="guest">
                         <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
                         Milk
                         <div class="tags"><span class="tag">Contains-Dairy</span></div>
@@ -908,7 +909,7 @@
                         Apple Juice
                         <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
                     </div>
-                    <div class="menu-item food-item" data-tags="vegan,gluten-free" data-source="staff">
+                    <div class="menu-item food-item" data-tags="vegan,gluten-free" data-source="student">
                         <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
                         Gatorade
                         <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
@@ -916,7 +917,7 @@
                 </div>
 
                 <div class="menu-array hidden" id="location6-array">
-                    <div class="menu-item food-item" data-tags="vegan,gluten-free" data-source="staff">
+                    <div class="menu-item food-item" data-tags="vegan,gluten-free" data-source="guest">
                         <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
                         Lettuce
                         <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
@@ -926,7 +927,7 @@
                         Cucumbers
                         <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
                     </div>
-                    <div class="menu-item food-item" data-tags="contains-gluten,vegetarian" data-source="staff">
+                    <div class="menu-item food-item" data-tags="contains-gluten,vegetarian" data-source="student">
                         <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
                         Croutons
                         <div class="tags"><span class="tag">Contains-Gluten</span><span class="tag">Vegetarian</span></div>
@@ -934,7 +935,7 @@
                 </div>
 
                 <div class="menu-array hidden" id="location7-array">
-                    <div class="menu-item food-item" data-tags="vegan,gluten-free" data-source="staff">
+                    <div class="menu-item food-item" data-tags="vegan,gluten-free" data-source="guest">
                         <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
                         Cantaloupe
                         <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
@@ -944,7 +945,7 @@
                         Strawberry Yogurt
                         <div class="tags"><span class="tag">Contains-Dairy</span><span class="tag">Vegetarian</span></div>
                     </div>
-                    <div class="menu-item food-item" data-tags="vegan" data-source="staff">
+                    <div class="menu-item food-item" data-tags="vegan" data-source="student">
                         <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
                         Frozen Bananas
                         <div class="tags"><span class="tag">Vegan</span></div>
@@ -952,7 +953,7 @@
                 </div>
 
                 <div class="menu-array hidden" id="location8-array">
-                    <div class="menu-item food-item" data-tags="contains-gluten,contains-dairy" data-source="staff">
+                    <div class="menu-item food-item" data-tags="contains-gluten,contains-dairy" data-source="guest">
                         <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
                         Brownies
                         <div class="tags"><span class="tag">Contains-Gluten</span><span class="tag">Contains-Dairy</span></div>
@@ -962,7 +963,7 @@
                         Oatmeal Rasin Cookies
                         <div class="tags"><span class="tag">Contains-Gluten</span><span class="tag">Vegetarian</span></div>
                     </div>
-                    <div class="menu-item food-item" data-tags="contains-gluten,contains-dairy" data-source="staff">
+                    <div class="menu-item food-item" data-tags="contains-gluten,contains-dairy" data-source="student">
                         <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
                         Cake Cuts
                         <div class="tags"><span class="tag">Contains-Gluten</span><span class="tag">Contains-Dairy</span></div>
@@ -978,7 +979,7 @@
                         bottom: 0;
                         left: 0;
                         right: 0;
-                        background: #99985b;
+                        background: #5e42a6;
                         padding: 16px;
                         border-top: 1px solid var(--border);
                         box-shadow: 0 -2px 6px rgba(10,20,30,0.06);
@@ -1055,6 +1056,54 @@
                 .feedback-btn:active {
                     transform: translateY(0);
                 }
+
+                .food-item {
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+
+                .food-item:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+                }
+
+                .food-item.selected {
+                    border: 2px solid var(--accent) !important;
+                    box-shadow: inset 0 0 0 1px var(--accent), 0 0 8px rgba(91, 33, 182, 0.3);
+                    transform: scale(1.02);
+                }
+
+                .no-items-message {
+                    display: none;
+                    padding: 24px;
+                    text-align: center;
+                    font-size: 16px;
+                    font-weight: 500;
+                    color: var(--muted);
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    background: #5e42a6;
+                    z-index: 15;
+                }
+
+                .no-items-message:not(.hidden) {
+                    display: block;
+                }
+
+                @media (min-width: 901px) {
+                    .no-items-message {
+                        position: absolute;
+                        bottom: auto;
+                        left: auto;
+                        right: auto;
+                        top: 60px;
+                        width: 240px;
+                        background: transparent;
+                        z-index: 7;
+                    }
+                }
             </style>
 
             <script>
@@ -1062,6 +1111,7 @@
                 const locationButtons = document.querySelectorAll('.location-btn');
                 const menuArrays = document.querySelectorAll('.menu-array');
                 const mapMarkers = document.querySelectorAll('.map-marker');
+                const noItemsMessage = document.getElementById('noItemsMessage');
                 const locationToggleBtn = document.querySelector('.location-toggle-btn');
                 const locationList = document.querySelector('.location-list');
                 const feedbackBtn = document.getElementById('feedback-global');
@@ -1101,6 +1151,8 @@
                 let modalSelectedLocation = null;
                 let allTags = []; // list of available tag keys
                 let currentSubmissionMode = 'guest'; // Default submission mode
+                let isSearchMode = false; // Track if search is active
+                let lastActiveLocationIndex = 0; // Remember last active location
 
                 // Function to validate form
                 function validateModalForm() {
@@ -1330,6 +1382,8 @@
 
                             // Attach delete handler to new item
                             attachDeleteHandlers();
+                            // Attach click handler for location highlighting
+                            attachFoodItemClickHandlers();
                             // Update delete button visibility
                             updateDeleteButtonVisibility();
 
@@ -1436,28 +1490,53 @@
                 // Add click event listeners to each location button
                 locationButtons.forEach((button, index) => {
                     button.addEventListener('click', () => {
-                        // Hide all arrays first
-                        hideAllArrays();
-                        // Remove active state from all buttons and markers
-                        removeActiveState();
+                        // Check if this location is already selected
+                        const isAlreadySelected = button.classList.contains('active');
                         
-                        // Show the corresponding array
-                        const arrayId = `location${index + 1}-array`;
-                        const targetArray = document.getElementById(arrayId);
-                        if (targetArray) {
-                            targetArray.classList.remove('hidden');
-                            button.classList.add('active');
+                        // Close search if it's open
+                        if (isSearchMode) {
+                            isSearchMode = false;
+                            searchBox.classList.add('hidden');
+                            searchBox.setAttribute('aria-hidden', 'true');
+                            tagListEl.classList.add('hidden');
+                            tagListEl.setAttribute('aria-hidden', 'true');
+                            searchInput.value = '';
+                            clearSelectedTags();
+                        }
+                        
+                        if (isAlreadySelected) {
+                            // Toggle off: show all items
+                            removeActiveState();
+                            menuArrays.forEach(arr => arr.classList.remove('hidden'));
+                            noItemsMessage.classList.add('hidden');
+                        } else {
+                            // Toggle on: show only this location
+                            hideAllArrays();
+                            removeActiveState();
                             
-                            // Activate corresponding map marker
-                            const marker = document.querySelector(`.map-marker[data-location="${index + 1}"]`);
-                            if (marker) {
-                                marker.classList.add('active');
+                            // Remember this location
+                            lastActiveLocationIndex = index;
+                            
+                            // Show the corresponding array
+                            const arrayId = `location${index + 1}-array`;
+                            const targetArray = document.getElementById(arrayId);
+                            if (targetArray) {
+                                targetArray.classList.remove('hidden');
+                                button.classList.add('active');
                                 
-                                // Smooth scroll to marker if it's not in view
-                                marker.scrollIntoView({ 
-                                    behavior: 'smooth',
-                                    block: 'center'
-                                });
+                                // Activate corresponding map marker
+                                const marker = document.querySelector(`.map-marker[data-location="${index + 1}"]`);
+                                if (marker) {
+                                    marker.classList.add('active');
+                                }
+                                
+                                // Check if any items are visible in this location
+                                const visibleItems = Array.from(targetArray.querySelectorAll('.food-item:not(.item-hidden)')).length;
+                                if (visibleItems === 0) {
+                                    noItemsMessage.classList.remove('hidden');
+                                } else {
+                                    noItemsMessage.classList.add('hidden');
+                                }
                             }
                         }
                     });
@@ -1466,36 +1545,53 @@
                 // Search toggle behavior
                 if (searchBtn && searchBox && searchInput && tagListEl) {
                     searchBtn.addEventListener('click', (e) => {
-                        // Toggle hidden state
-                        const nowHidden = searchBox.classList.toggle('hidden');
-                        searchBox.setAttribute('aria-hidden', nowHidden ? 'true' : 'false');
+                        // Toggle search mode
+                        isSearchMode = !isSearchMode;
+                        
+                        if (isSearchMode) {
+                            // Entering search mode: show search box and tags
+                            searchBox.classList.remove('hidden');
+                            searchBox.setAttribute('aria-hidden', 'false');
 
-                        // Toggle tag list visibility together with search box
-                        tagListEl.classList.toggle('hidden', nowHidden);
-                        tagListEl.setAttribute('aria-hidden', nowHidden ? 'true' : 'false');
+                            // Show tag list
+                            tagListEl.classList.remove('hidden');
+                            tagListEl.setAttribute('aria-hidden', 'false');
 
-                        if (!nowHidden) {
-                            // Opened: focus the input and build tag buttons if needed
+                            // Build tag buttons if needed
                             buildTagButtons();
                             setTimeout(() => searchInput.focus(), 0);
+                            
+                            // Remove highlighting from locations and markers (but keep them visible)
+                            removeActiveState();
+                            
+                            // Show all items when search opens
+                            filterItems();
                         } else {
-                            // Closed: clear input and clear selected tags
+                            // Exiting search mode: return to location mode
+                            searchBox.classList.add('hidden');
+                            searchBox.setAttribute('aria-hidden', 'true');
+                            tagListEl.classList.add('hidden');
+                            tagListEl.setAttribute('aria-hidden', 'true');
+                            
+                            // Clear search input and tags
                             searchInput.value = '';
                             clearSelectedTags();
-                            // Reset filtering
-                            filterItems();
-                        }
-                        e.stopPropagation();
-                    });
-
-                    // Close search when clicking outside
-                    document.addEventListener('click', (evt) => {
-                        if (!searchBox.classList.contains('hidden')) {
-                            if (!searchBox.contains(evt.target) && !searchBtn.contains(evt.target)) {
-                                searchBox.classList.add('hidden');
-                                searchBox.setAttribute('aria-hidden', 'true');
+                            
+                            // Check if any location button is currently active
+                            const activeLocationBtn = document.querySelector('.location-btn.active');
+                            
+                            if (activeLocationBtn) {
+                                // A location is selected, keep showing that location
+                                // Re-apply filter to show all items for the location
+                                filterItems();
+                            } else {
+                                // No location selected, show all items
+                                removeActiveState();
+                                menuArrays.forEach(arr => arr.classList.remove('hidden'));
+                                filterItems();
                             }
                         }
+                        e.stopPropagation();
                     });
 
                     // Close on Escape
@@ -1598,35 +1694,87 @@
                                 }
                             });
 
-                            // Show or hide the whole array and its corresponding location button
-                            const id = arr.id || '';
-                            const match = id.match(/location(\d+)-array/);
+                            // Hide/show arrays based on visibility of items
+                            // Location buttons always stay visible
                             if (!anyVisible) {
                                 arr.classList.add('hidden');
-                                if (match) {
-                                    const idx = parseInt(match[1], 10) - 1;
-                                    if (locationButtons[idx]) locationButtons[idx].style.display = 'none';
-                                }
                             } else {
                                 arr.classList.remove('hidden');
-                                if (match) {
-                                    const idx = parseInt(match[1], 10) - 1;
-                                    if (locationButtons[idx]) locationButtons[idx].style.display = '';
-                                }
                             }
                         });
+
+                        // Check if a location is currently selected and show/hide no items message
+                        const activeLocationBtn = document.querySelector('.location-btn.active');
+                        if (activeLocationBtn) {
+                            const activeIndex = Array.from(locationButtons).indexOf(activeLocationBtn);
+                            const activeArray = document.getElementById(`location${activeIndex + 1}-array`);
+                            if (activeArray && !activeArray.classList.contains('hidden')) {
+                                const visibleItems = Array.from(activeArray.querySelectorAll('.food-item:not(.item-hidden)')).length;
+                                if (visibleItems === 0) {
+                                    noItemsMessage.classList.remove('hidden');
+                                } else {
+                                    noItemsMessage.classList.add('hidden');
+                                }
+                            }
+                        }
                     }
                 }
 
-                // Show the first location's array and marker by default
-                document.getElementById('location1-array').classList.remove('hidden');
-                if (locationButtons[0]) locationButtons[0].classList.add('active');
-                const firstMarker = document.querySelector('.map-marker[data-location="1"]');
-                if (firstMarker) firstMarker.classList.add('active');
+                // Show all locations' arrays by default (no selection)
+                menuArrays.forEach(arr => arr.classList.remove('hidden'));
+                // Don't highlight any location button or marker
+                // locationButtons and mapMarkers remain unselected
+
+                // Function to handle food item clicks
+                function attachFoodItemClickHandlers() {
+                    document.querySelectorAll('.food-item').forEach(item => {
+                        // Only attach click handler if not already attached
+                        if (item.dataset.clickHandlerAttached !== '1') {
+                            item.addEventListener('click', (e) => {
+                                // Don't trigger if delete button was clicked
+                                if (e.target.classList.contains('food-item-delete')) {
+                                    return;
+                                }
+
+                                // Find which location this food item belongs to
+                                const menuArray = item.closest('.menu-array');
+                                if (!menuArray) return;
+
+                                const match = menuArray.id.match(/location(\d+)-array/);
+                                if (!match) return;
+
+                                const locationIndex = parseInt(match[1], 10) - 1;
+
+                                // Remove selected state from all food items
+                                document.querySelectorAll('.food-item.selected').forEach(fi => {
+                                    fi.classList.remove('selected');
+                                });
+
+                                // Add selected state to clicked item
+                                item.classList.add('selected');
+
+                                // Highlight the location button
+                                removeActiveState();
+                                if (locationButtons[locationIndex]) {
+                                    locationButtons[locationIndex].classList.add('active');
+                                }
+
+                                // Highlight the map marker
+                                if (mapMarkers[locationIndex]) {
+                                    mapMarkers[locationIndex].classList.add('active');
+                                }
+                            });
+                            item.dataset.clickHandlerAttached = '1';
+                        }
+                    });
+                }
 
                 // Initialize delete handlers and visibility
                 attachDeleteHandlers();
                 updateDeleteButtonVisibility();
+
+                // Initialize food item click handlers
+                attachFoodItemClickHandlers();
 
                 // Initialize filter on page load
                 filterItems();
