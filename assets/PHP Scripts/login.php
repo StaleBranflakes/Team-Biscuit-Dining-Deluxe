@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user && password_verify($pw, $user['password'])) {
-        // Optional: start a session
+        // TODO: Creat a session
         session_start();
         $_SESSION['username'] = $user['uName'];
 
