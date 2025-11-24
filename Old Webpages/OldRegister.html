@@ -8,27 +8,35 @@
     <link rel="stylesheet" href="../assets/css/fontawesome-all.min.css">
     <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="../assets/css/noscript.css">
+    <script src="../assets/js/jquery.min.js"></script>
+    <script src="../assets/js/browser.min.js"></script>
+    <script src="../assets/js/breakpoints.min.js"></script>
+    <script src="../assets/js/util.js"></script>
+    <script src="../assets/js/main.js"></script>
+
 </head>
 
 <body>
-    <header id="header">
-        <a href="Home.html" class="title">UNCP Dining Deluxe</a>
-        <nav>
-            <ul>
-                <li><a href="Home.html">Home</a></li>
-                <li><a href="Menu.html" class="active">Menu</a></li>
-                <li><a href="About.html">About</a></li>
-                <li><a href="Login.html">Login</a></li>
-                <li><a href="Contact.html">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
-    
+<!-- Header--> 
+			<header id="header">
+				<a href="Home.html" class="title">UNCP Dining Deluxe</a>
+				<nav>
+					<ul>
+						<li><a href="Home.html">Home</a></li>
+						<li><a href="Map.html" class="active">Menu</a></li>
+						<li><a href="Login.html">Login</a></li>
+					</ul>
+				</nav>
+			</header>
     <main>
-        <div style="padding: 2em; max-width: 600px; margin: 0 auto;">
-            <h2>Register Here</h2>
-            <!-- Removed PHP Action, added ID for JS -->
-            <form id="registerForm">
+        <table>
+            <tr>
+                <title> Register Here</title>
+
+                
+            </tr>
+            <tr>
+                <form action="../assets/PHP Scripts/register_user.php" method="POST">
                     <div>
                         <label for="fname">First Name: </label>
                         <input type="text" id="fname" name="fname" required>
@@ -73,35 +81,19 @@
                     <div>
                         <button type="reset">Reset</button>
                     </div>
-            </form>
-        </div>
+
+                </form>
+        </table>
     </main>
 
-    <!-- Footer -->
-    <footer id="footer" class="wrapper alt">
-        <div class="inner">
-            <ul class="menu">
-                <li>&copy; Biscuit inc. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-            </ul>
-        </div>
-    </footer>
-
-    <script src="../assets/js/jquery.min.js"></script>
-    <script src="../assets/js/browser.min.js"></script>
-    <script src="../assets/js/breakpoints.min.js"></script>
-    <script src="../assets/js/util.js"></script>
-    <script src="../assets/js/main.js"></script>
-
-    <!-- Custom Auth Script -->
-    <script src="../assets/js/auth.js"></script>
-    <script>
-        // Handle Form Submit
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            e.preventDefault(); // Stop page from reloading
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
-            registerUser(user, pass); // Call function from auth.js
-        });
-    </script>
+		<!-- Footer -->
+		<footer id="footer" class="wrapper alt">
+				<div class="inner">
+					<ul class="menu">
+						<li>&copy; Biscuit inc. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+					</ul>
+				</div>
+		</footer>    
 </body>
+
 </html>
