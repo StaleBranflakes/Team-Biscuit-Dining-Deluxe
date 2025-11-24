@@ -17,15 +17,17 @@
 </head>
 
 <body>
-    <header>
-        <a href="Home.html" class="title">UNCP Dining Deluxe</a>
-        <nav>
-            <ul>
-                <li><a href="Home.html">Home</a></li>
-                <li><a href="Menu.html" class="active">Menu</a></li>
-                <li><a href="Login.html">Login</a></li>
-            </ul>
-    </header>
+<!-- Header--> 
+			<header id="header">
+				<a href="Home.html" class="title">UNCP Dining Deluxe</a>
+				<nav>
+					<ul>
+						<li><a href="Home.html">Home</a></li>
+						<li><a href="Map.html" class="active">Menu</a></li>
+						<li><a href="Login.html">Login</a></li>
+					</ul>
+				</nav>
+			</header>
     <main>
         <table>
             <tr>
@@ -35,11 +37,26 @@
             </tr>
             <tr>
                 <form action="../assets/PHP Scripts/register_user.php" method="POST">
-                   
+                    <div>
+                        <label for="fname">First Name: </label>
+                        <input type="text" id="fname" name="fname" required>
+                    </div>
+
+                    <div>
+                        <label for="lname">Last Name: </label>
+                        <input type="text" id="lname" name="lname" required>
+                    </div>
+
+                    <div>
+                        <label for="bannerID">Banner ID: </label>
+                        <input type="text" id="bannerID" name="bannerID" required>
+                    </div>
+
                     <div>
                         <label for="username">Username:</label> 
                         
                     </div>
+
                     <div>
                         <input type="text" id="username" name="username" required>
                     </div>
@@ -47,12 +64,22 @@
                     <div>
                         <label for="password">Password:</label>
                     </div>
+
                     <div>
                         <input type="password" id="password" name="password" required>
                     </div>
 
                     <div>
+                        <label for="confirmPW">Confirm Password: </label>
+                        <input type="text" id="confirmPW" name="confirmPW" required>
+                    </div>
+
+                    <div>
                         <button type="submit">Register</button>
+                    </div>
+
+                    <div>
+                        <button type="reset">Reset</button>
                     </div>
 
                 </form>

@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$uName || !$pw) {
         die("Username or password missing.");
     }
-
+    
     $conn = openDatabase();
 
     $check = $conn->prepare("SELECT * FROM users WHERE uName = :uName");

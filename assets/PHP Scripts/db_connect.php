@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL);
-ini_set('dispplay_errors', 1);
+ini_set('display_errors', 1);
 function openDatabase(){
     $host = "localhost";
     $port = "5432";
@@ -9,7 +9,7 @@ function openDatabase(){
     $password = "pgadmin";
 
     try{
-        $conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname;$user;$password;");
+        $conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $user, $password);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $conn;
 
