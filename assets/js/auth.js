@@ -58,6 +58,6 @@ function logoutUser() {
 function checkAuth() {
     const user = localStorage.getItem(SESSION_KEY);
     if (!user) {
-        // window.location.href = 'Login.html'; // Uncomment to force login
+        window.location.href = 'Map.html'; // Uncomment to force login
     }
 }
