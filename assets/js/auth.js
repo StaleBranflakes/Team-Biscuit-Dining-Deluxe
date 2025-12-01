@@ -24,7 +24,7 @@ function registerUser(username, password) {
     // 4. Save back to LocalStorage
     localStorage.setItem(DB_KEY, JSON.stringify(users));
     alert("Registration successful! Please login.");
-    window.location.href = 'Login.html'; // Redirect to login
+    window.location.href = 'Map.html'; // Redirect to login
     return true;
 }
 
