@@ -3,7 +3,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Map — Mobile (Persistent)</title>
+    <title>Map</title>
+    <script src="../assets/js/auth.js"></script> 
+    
     <style>
         :root {
             --bg: #312450;
@@ -17,7 +19,6 @@
 
         .container { max-width:720px; margin:0 auto; }
 
-        /* Top rectangular box */
         .header-box{
             box-sizing:border-box;
             width:100%;
@@ -50,7 +51,7 @@
             font-size:16px;
         }
 
-        .search-btn, .filter-btn, .reset-btn{
+        .search-btn, .filter-btn, .logout-btn{
             background:var(--card);
             color:var(--accent);
             border:1px solid var(--accent);
@@ -61,17 +62,22 @@
             cursor: pointer;
         }
         
-        .reset-btn {
-            font-size: 12px;
+        .logout-btn {
+            font-size: 14px;
             border-color: #ff3b30;
             color: #ff3b30;
+            margin-left: auto; 
+        }
+
+        .logout-btn:hover {
+            background: #ff3b30;
+            color: white;
         }
 
         .search-btn:hover, .filter-btn:hover {
             background: var(--bg);
         }
 
-        /* Search box (hidden by default) */
         .search-box {
             display: inline-flex;
             align-items: center;
@@ -96,7 +102,6 @@
             border-color: var(--accent);
         }
 
-        /* Tag button list shown when search opens */
         .tag-list {
             display: flex;
             gap: 8px;
@@ -124,7 +129,6 @@
             box-shadow: 0 2px 6px rgba(91,33,182,0.12);
         }
 
-        /* Tags for food items */
         .tags {
             margin-top: 6px;
             display: flex;
@@ -145,7 +149,6 @@
 
         .item-hidden { display: none; }
 
-        /* Modal overlay */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -338,7 +341,6 @@
             transition: all 0.2s ease;
         }
 
-        /* Filter modal checkbox styling */
         .filter-checkbox-group {
             display: flex;
             align-items: center;
@@ -381,7 +383,6 @@
             line-height: 1.3;
         }
 
-        /* Mode selector styling */
         .filter-mode-section {
             margin-bottom: 20px;
             padding-bottom: 20px;
@@ -429,7 +430,6 @@
             box-shadow: 0 2px 4px rgba(91, 33, 182, 0.2);
         }
 
-        /* Delete button for food items */
         .food-item-delete {
             display: none;
             position: absolute;
@@ -462,7 +462,6 @@
             display: flex;
         }
 
-        /* Food item background colors based on submission source */
         .food-item[data-source="staff"] {
             background: #fef3c7 !important;
             border-color: #fcd34d !important;
@@ -478,7 +477,6 @@
             border-color: #d1d5db !important;
         }
         
-        /* Image Thumbnail in list */
         .food-thumbnail {
             width: 100%;
             height: 100px;
@@ -488,7 +486,6 @@
             display: block;
         }
 
-        /* Locations: 2 columns on most phones, single column on very narrow */
         .location-list{
             display:grid;
             grid-template-columns: repeat(2, 1fr);
@@ -685,6 +682,13 @@
                 padding-bottom: 8px;
             }
         }
+        
+        /* CRITICAL: Hide the feedback button by default.
+           JavaScript checks if user is Admin and shows it. 
+        */
+        #feedback-global {
+            display: none; 
+        }
     </style>
 </head>
 <body>
@@ -695,7 +699,8 @@
                 <button class="title-btn" type="button" aria-label="Title button">Dining Deluxe</button>
                 <button class="filter-btn" type="button" aria-label="Filter button">Filter</button>
                 <button class="search-btn" type="button" aria-label="Search button">Search</button>
-                <button class="reset-btn" type="button" id="resetDataBtn" title="Reset all data to defaults">Reset Data</button>
+                
+                <button class="logout-btn" type="button" id="logoutBtn" title="Logout">Logout</button>
                 
                 <div class="search-box hidden" role="search" aria-hidden="true">
                     <input type="search" class="search-input" placeholder="Search locations..." aria-label="Search locations">
@@ -731,7 +736,7 @@
             
             <div class="modal-overlay" id="feedbackModal">
                 <div class="modal-box">
-                    <div class="modal-header">Tell us what's here</div>
+                    <div class="modal-header">Tell us what's here (Admin Only)</div>
                     
                     <div class="modal-form-group">
                         <label class="modal-label">Food Name</label>
@@ -768,11 +773,9 @@
                 <div class="modal-box">
                     <div class="modal-header">Filter Food Items</div>
                     
-                    <div class="filter-mode-section">
+                    <div class="filter-mode-section" id="adminDebugSection" style="display:none;">
                         <label class="filter-mode-label">Debug: Submission Mode</label>
                         <div class="filter-mode-buttons">
-                            <button type="button" class="filter-mode-btn active" id="modeBtnGuest" data-mode="guest">Guest</button>
-                            <button type="button" class="filter-mode-btn" id="modeBtnStudent" data-mode="student">Student</button>
                             <button type="button" class="filter-mode-btn" id="modeBtnStaff" data-mode="staff">Staff</button>
                         </div>
                     </div>
@@ -933,51 +936,31 @@
             </style>
 
             <script>
-                // --- DATA PERSISTENCE LAYER ---
+                // --- AUTHENTICATION CHECK ---
+                const currentUser = getCurrentUser();
+                const userRole = currentUser ? currentUser.role : 'base'; 
+                const isAdmin = (userRole === 'admin');
 
-                // Unique ID Generator
+                // Attach Logout Listener
+                const logoutBtn = document.getElementById('logoutBtn');
+                if(logoutBtn) {
+                    logoutBtn.addEventListener('click', logoutUser);
+                }
+
+                // --- DATA PERSISTENCE LAYER ---
                 function generateId() {
                     return Date.now().toString(36) + Math.random().toString(36).substr(2);
                 }
 
-                // Default Data (used if no local storage found)
+                // Default Data
                 const defaultData = [
                     { id: generateId(), name: "Potatoes", tags: ["vegetarian","keto"], source: "staff", locationId: 1 },
                     { id: generateId(), name: "Porkchops", tags: ["pork","contains-gluten"], source: "staff", locationId: 1 },
-                    { id: generateId(), name: "Tofu", tags: ["vegan","gluten-free"], source: "student", locationId: 1 },
-                    
                     { id: generateId(), name: "Cheeseburger", tags: ["beef","contains-dairy"], source: "guest", locationId: 2 },
-                    { id: generateId(), name: "Hotdog", tags: ["pork"], source: "staff", locationId: 2 },
-                    { id: generateId(), name: "Fries", tags: ["vegan","vegetarian"], source: "student", locationId: 2 },
-
-                    { id: generateId(), name: "Pineapple Pizza", tags: ["contains-gluten","contains-dairy"], source: "guest", locationId: 3 },
-                    { id: generateId(), name: "Sausage Pizza", tags: ["contains-meat","contains-gluten"], source: "guest", locationId: 3 },
-                    { id: generateId(), name: "Stromboli", tags: ["contains-meat","contains-gluten"], source: "student", locationId: 3 },
-
-                    { id: generateId(), name: "Chicken Cuts", tags: ["chicken","high-protein"], source: "guest", locationId: 4 },
-                    { id: generateId(), name: "Cauliflour", tags: ["vegetarian","vegan","gluten-free"], source: "staff", locationId: 4 },
-                    { id: generateId(), name: "Alfredo Sauce", tags: ["contains-dairy","vegetarian"], source: "student", locationId: 4 },
-
-                    { id: generateId(), name: "Milk", tags: ["contains-dairy"], source: "guest", locationId: 5 },
-                    { id: generateId(), name: "Apple Juice", tags: ["vegan","gluten-free"], source: "staff", locationId: 5 },
-                    { id: generateId(), name: "Gatorade", tags: ["vegan","gluten-free"], source: "student", locationId: 5 },
-
-                    { id: generateId(), name: "Lettuce", tags: ["vegan","gluten-free"], source: "guest", locationId: 6 },
-                    { id: generateId(), name: "Cucumbers", tags: ["vegan","gluten-free"], source: "staff", locationId: 6 },
-                    { id: generateId(), name: "Croutons", tags: ["contains-gluten","vegetarian"], source: "student", locationId: 6 },
-
-                    { id: generateId(), name: "Cantaloupe", tags: ["vegan","gluten-free"], source: "guest", locationId: 7 },
-                    { id: generateId(), name: "Strawberry Yogurt", tags: ["contains-dairy","vegetarian"], source: "staff", locationId: 7 },
-                    { id: generateId(), name: "Frozen Bananas", tags: ["vegan"], source: "student", locationId: 7 },
-
-                    { id: generateId(), name: "Brownies", tags: ["contains-gluten","contains-dairy"], source: "guest", locationId: 8 },
-                    { id: generateId(), name: "Oatmeal Rasin Cookies", tags: ["contains-gluten","vegetarian"], source: "staff", locationId: 8 },
-                    { id: generateId(), name: "Cake Cuts", tags: ["contains-gluten","contains-dairy"], source: "student", locationId: 8 }
                 ];
 
                 let allFoodItems = [];
 
-                // Save to Browser Storage
                 function saveData() {
                     try {
                         localStorage.setItem('dining_deluxe_items', JSON.stringify(allFoodItems));
@@ -987,7 +970,6 @@
                     }
                 }
 
-                // Load from Browser Storage
                 function loadData() {
                     const stored = localStorage.getItem('dining_deluxe_items');
                     if (stored) {
@@ -1003,20 +985,10 @@
                     renderAllItems();
                 }
 
-                // Reset Data Button
-                document.getElementById('resetDataBtn').addEventListener('click', () => {
-                    if(confirm("Are you sure you want to reset all data to default? You will lose custom items.")) {
-                        localStorage.removeItem('dining_deluxe_items');
-                        location.reload();
-                    }
-                });
-
                 // Render all items to the DOM based on the data array
                 function renderAllItems() {
-                    // Clear existing HTML in arrays
                     document.querySelectorAll('.menu-array').forEach(el => el.innerHTML = '');
 
-                    // Loop through data and build HTML
                     allFoodItems.forEach(item => {
                         const container = document.getElementById(`location${item.locationId}-array`);
                         if (container) {
@@ -1024,22 +996,27 @@
                             div.className = 'menu-item food-item';
                             div.dataset.tags = item.tags.join(',');
                             div.dataset.source = item.source;
-                            div.dataset.id = item.id; // Store ID in DOM
+                            div.dataset.id = item.id; 
                             
-                            // Image
                             let imgHtml = '';
                             if (item.image) {
                                 imgHtml = `<img src="${item.image}" class="food-thumbnail" alt="${item.name}">`;
                             }
 
-                            // Tags HTML
+                            // Only add Delete button HTML if user is Admin
+                            let deleteBtnHtml = '';
+                            if (isAdmin) {
+                                deleteBtnHtml = `<button type="button" class="food-item-delete" aria-label="Delete item">✕</button>`;
+                                div.classList.add('show-delete');
+                            }
+
                             const tagsHtml = item.tags.map(tag => {
                                 const label = tag.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
                                 return `<span class="tag">${label}</span>`;
                             }).join('');
 
                             div.innerHTML = `
-                                <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
+                                ${deleteBtnHtml}
                                 ${imgHtml}
                                 ${item.name}
                                 <div class="tags">${tagsHtml}</div>
@@ -1049,15 +1026,25 @@
                         }
                     });
 
-                    // After rendering, re-apply filters and handlers
-                    // Note: Event listeners for delete/click are handled via delegation now (see below),
-                    // so we don't need to re-attach them to every element individually.
                     applySourceFilter();
+                    applyUserPermissions();
                 }
 
+                // --- PERMISSIONS LOGIC ---
+                function applyUserPermissions() {
+                    const feedbackBtn = document.getElementById('feedback-global');
+                    const adminDebugSection = document.getElementById('adminDebugSection');
+
+                    if (isAdmin) {
+                        if(feedbackBtn) feedbackBtn.style.display = 'block';
+                        if(adminDebugSection) adminDebugSection.style.display = 'block';
+                    } else {
+                        if(feedbackBtn) feedbackBtn.style.display = 'none';
+                        if(adminDebugSection) adminDebugSection.style.display = 'none';
+                    }
+                }
 
                 // --- APP LOGIC ---
-
                 const locationButtons = document.querySelectorAll('.location-btn');
                 const menuArrays = document.querySelectorAll('.menu-array');
                 const mapMarkers = document.querySelectorAll('.map-marker');
@@ -1083,9 +1070,6 @@
                 const filterGuests = document.getElementById('filterGuests');
                 const filterStudents = document.getElementById('filterStudents');
                 const filterStaff = document.getElementById('filterStaff');
-                const modeBtnGuest = document.getElementById('modeBtnGuest');
-                const modeBtnStudent = document.getElementById('modeBtnStudent');
-                const modeBtnStaff = document.getElementById('modeBtnStaff');
 
                 const imageInput = document.getElementById('imageInput');
                 const imageUploadBtn = document.getElementById('imageUploadBtn');
@@ -1095,25 +1079,20 @@
                 const selectedTags = new Set();
                 const modalSelectedTags = new Set();
                 let modalSelectedLocation = null;
-                let currentSubmissionMode = 'guest';
                 let isSearchMode = false;
 
-                // Event Delegation for Food Item Clicks & Delete
                 document.querySelector('.bottom-menu').addEventListener('click', (e) => {
-                    
                     // Handle Delete
                     if (e.target.classList.contains('food-item-delete')) {
+                        if (!isAdmin) return; // Permission Check
                         e.stopPropagation();
                         const foodItem = e.target.closest('.food-item');
                         const idToDelete = foodItem.dataset.id;
                         
                         if(confirm("Delete this item?")) {
-                            // Update Data
                             allFoodItems = allFoodItems.filter(item => item.id !== idToDelete);
                             saveData();
-                            // Update UI
                             renderAllItems();
-                            // If searching, re-filter
                             if(isSearchMode) filterItems();
                         }
                         return;
@@ -1156,34 +1135,17 @@
                 if (filterStudents) filterStudents.addEventListener('change', applySourceFilter);
                 if (filterStaff) filterStaff.addEventListener('change', applySourceFilter);
 
-                [modeBtnGuest, modeBtnStudent, modeBtnStaff].forEach(btn => {
-                    if (btn) {
-                        btn.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            document.querySelectorAll('.filter-mode-btn').forEach(b => b.classList.remove('active'));
-                            btn.classList.add('active');
-                            currentSubmissionMode = btn.dataset.mode;
-                            updateDeleteButtonVisibility();
-                        });
-                    }
-                });
-
                 function applySourceFilter() {
                     filterItems();
-                    updateDeleteButtonVisibility();
-                }
-
-                function updateDeleteButtonVisibility() {
-                    const isStaffMode = currentSubmissionMode === 'staff';
-                    document.querySelectorAll('.food-item').forEach(item => {
-                        if (isStaffMode) item.classList.add('show-delete');
-                        else item.classList.remove('show-delete');
-                    });
                 }
 
                 // Feedback Modal Logic
                 if (feedbackBtn) {
                     feedbackBtn.addEventListener('click', () => {
+                        if (!isAdmin) {
+                            alert("Only administrators can add items.");
+                            return;
+                        }
                         feedbackModal.classList.add('active');
                         foodNameInput.focus();
                         if (modalTagsList.children.length === 0) {
@@ -1251,7 +1213,7 @@
                                 name: foodName,
                                 tags: selectedTagsArray,
                                 locationId: locationIndex + 1, // Store as 1-based index
-                                source: currentSubmissionMode,
+                                source: 'staff', // Force source to Staff since only Admins can add
                                 image: selectedImage
                             };
 
@@ -1449,14 +1411,10 @@
                             if (show) anyVisible = true;
                         });
 
-                        // Only hide array container if we are NOT in specific location mode
                         const activeLocationBtn = document.querySelector('.location-btn.active');
                         if (!activeLocationBtn) {
-                             // Global view or search view: hide array if empty
                              arr.classList.toggle('hidden', !anyVisible);
                         } else {
-                             // Location selected: container logic handled by location button click, 
-                             // but we check if empty to show "No items"
                              const activeIndex = Array.from(locationButtons).indexOf(activeLocationBtn);
                              if(arr.id === `location${activeIndex+1}-array`) {
                                  noItemsMessage.classList.toggle('hidden', anyVisible);
@@ -1465,9 +1423,7 @@
                     });
                 }
 
-                // INITIALIZE
                 loadData();
-
             </script>
     </div>
  		<footer id="footer" class="wrapper style1-alt">
