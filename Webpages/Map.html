@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Map — Mobile</title>
+    <title>Map — Mobile (Persistent)</title>
     <style>
         :root {
             --bg: #312450;
@@ -50,7 +50,7 @@
             font-size:16px;
         }
 
-        .search-btn, .filter-btn{
+        .search-btn, .filter-btn, .reset-btn{
             background:var(--card);
             color:var(--accent);
             border:1px solid var(--accent);
@@ -59,6 +59,12 @@
             font-weight:600;
             font-size:16px;
             cursor: pointer;
+        }
+        
+        .reset-btn {
+            font-size: 12px;
+            border-color: #ff3b30;
+            color: #ff3b30;
         }
 
         .search-btn:hover, .filter-btn:hover {
@@ -265,19 +271,10 @@
             box-shadow: none;
         }
 
-        .modal-btn-submit:disabled:hover {
-            background: #d1d5db;
-            transform: none;
-        }
-
         .modal-btn-cancel {
             background: var(--bg);
             color: #5052b5;
             border: 1px solid var(--border);
-        }
-
-        .modal-btn-cancel:hover {
-            background: var(--border);
         }
 
         .modal-image-input {
@@ -339,10 +336,6 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
-        }
-
-        .modal-image-remove:hover {
-            background: rgba(255, 59, 48, 1);
         }
 
         /* Filter modal checkbox styling */
@@ -436,7 +429,7 @@
             box-shadow: 0 2px 4px rgba(91, 33, 182, 0.2);
         }
 
-        /* Delete button for food items (staff mode) */
+        /* Delete button for food items */
         .food-item-delete {
             display: none;
             position: absolute;
@@ -483,6 +476,16 @@
         .food-item[data-source="guest"] {
             background: #f3f4f6 !important;
             border-color: #d1d5db !important;
+        }
+        
+        /* Image Thumbnail in list */
+        .food-thumbnail {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            display: block;
         }
 
         /* Locations: 2 columns on most phones, single column on very narrow */
@@ -607,13 +610,10 @@
             transform: translate(-50%, -50%) scale(1);
         }
 
-        /* Desktop / wide layout: left vertical controls, center map, right vertical menu */
+        /* Desktop / wide layout */
         @media (min-width: 901px) {
             body { display: block; }
-
-            html, body {
-                overflow: hidden;
-            }
+            html, body { overflow: hidden; }
             
             .container {
                 display: grid;
@@ -625,7 +625,6 @@
                 height: 100vh;
             }
 
-            /* Left column: header-box becomes a vertical panel */
             .header-box {
                 position: relative;
                 height: calc(100vh - 32px);
@@ -639,7 +638,6 @@
             .location-list { display: block; }
             .location-list li { margin-bottom: 10px; }
 
-            /* Center: map area larger and full height */
             main { 
                 padding: 0;
                 height: calc(100vh - 32px);
@@ -650,7 +648,6 @@
                 height: 100%;
             }
 
-            /* Right column: bottom-menu becomes a vertical panel */
             .bottom-menu {
                 position: relative;
                 height: calc(100vh - 32px);
@@ -662,7 +659,6 @@
                 background: #5e42a6;
             }
 
-            /* Stack menu items vertically in the right panel */
             .menu-array {
                 display: flex;
                 flex-direction: column;
@@ -681,7 +677,6 @@
                 border-radius: 8px;
                 padding: 12px 20px;
             }
-            /* Keep the global menu header sticky at the top of the right panel */
             .menu-header {
                 position: sticky;
                 top: 0;
@@ -697,14 +692,14 @@
     <div class="container">
         <header class="header-box" role="banner" aria-label="Map controls">
             <div class="header-row">
-                <button class="title-btn" type="button" aria-label="Title button">Dining Deluxe - Map</button>
+                <button class="title-btn" type="button" aria-label="Title button">Dining Deluxe</button>
                 <button class="filter-btn" type="button" aria-label="Filter button">Filter</button>
                 <button class="search-btn" type="button" aria-label="Search button">Search</button>
-                <!-- Search box toggled by the Search button -->
+                <button class="reset-btn" type="button" id="resetDataBtn" title="Reset all data to defaults">Reset Data</button>
+                
                 <div class="search-box hidden" role="search" aria-hidden="true">
                     <input type="search" class="search-input" placeholder="Search locations..." aria-label="Search locations">
                 </div>
-                <!-- Tag buttons will appear here when search opens -->
                 <div class="tag-list hidden" aria-hidden="true"></div>
             </div>
 
@@ -724,7 +719,6 @@
         <main>
             <div class="map-container">
                 <img src="../Images/Menu Images/diningmap1.png" alt="Location Map" class="map-image">
-                <!-- Location markers -->
                 <div class="map-marker" data-location="1" style="top: 17%; left: 35%;"></div>
                 <div class="map-marker" data-location="2" style="top: 17%; left: 59%;"></div>
                 <div class="map-marker" data-location="3" style="top: 40%; left: 60%;"></div>
@@ -735,7 +729,6 @@
                 <div class="map-marker" data-location="8" style="top: 55%; left: 90%;"></div>
             </div>
             
-            <!-- Feedback Modal -->
             <div class="modal-overlay" id="feedbackModal">
                 <div class="modal-box">
                     <div class="modal-header">Tell us what's here</div>
@@ -771,7 +764,6 @@
                 </div>
             </div>
 
-            <!-- Filter Modal -->
             <div class="modal-overlay" id="filterModal">
                 <div class="modal-box">
                     <div class="modal-header">Filter Food Items</div>
@@ -818,162 +810,23 @@
         </main>
 
             <div class="bottom-menu">
-                <!-- Global feedback button (separate from arrays) -->
                 <div class="menu-header">
                     <button id="feedback-global" class="menu-item feedback-btn">Tell us what's here</button>
                 </div>
 
-                <!-- No items available message -->
                 <div id="noItemsMessage" class="no-items-message hidden">No items available.</div>
 
-                <!-- Location Arrays -->
-                <div class="menu-array" id="location1-array">
-                    <div class="menu-item food-item" data-tags="vegetarian,keto" data-source="staff">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Potatoes
-                        <div class="tags"><span class="tag">Vegetarian</span><span class="tag">Keto</span></div>
-                    </div>
-                    <div class="menu-item food-item" data-tags="pork,contains-gluten" data-source="staff">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Porkchops
-                        <div class="tags"><span class="tag">Pork</span><span class="tag">Contains-Gluten</span></div>
-                    </div>
-                    <div class="menu-item food-item" data-tags="vegan,gluten-free" data-source="student">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Tofu
-                        <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
-                    </div>
-                </div>
-                
-                <div class="menu-array hidden" id="location2-array">
-                    <div class="menu-item food-item" data-tags="beef,contains-dairy" data-source="guest">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Cheeseburger
-                        <div class="tags"><span class="tag">Beef</span><span class="tag">Contains-Dairy</span></div>
-                    </div>
-                    <div class="menu-item food-item" data-tags="pork" data-source="staff">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Hotdog
-                        <div class="tags"><span class="tag">Pork</span></div>
-                    </div>
-                    <div class="menu-item food-item" data-tags="vegan,vegetarian" data-source="student">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Fries
-                        <div class="tags"><span class="tag">Vegan</span><span class="tag">Vegetarian</span></div>
-                    </div>
-                </div>
-
-                <div class="menu-array hidden" id="location3-array">
-                    <div class="menu-item food-item" data-tags="contains-gluten,contains-dairy" data-source="guest">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Pineapple Pizza
-                        <div class="tags"><span class="tag">Contains-Gluten</span><span class="tag">Contains-Dairy</span></div>
-                    </div>
-                    <div class="menu-item food-item" data-tags="contains-meat,contains-gluten" data-source="guest">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Sausage Pizza
-                        <div class="tags"><span class="tag">Contains-Meat</span><span class="tag">Contains-Gluten</span></div>
-                    </div>
-                    <div class="menu-item food-item" data-tags="contains-meat,contains-gluten" data-source="student">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Stromboli
-                        <div class="tags"><span class="tag">Contains-Meat</span><span class="tag">Contains-Gluten</span></div>
-                    </div>
-                </div>
-
-                <div class="menu-array hidden" id="location4-array">
-                    <div class="menu-item food-item" data-tags="chicken,high-protein" data-source="guest">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Chicken Cuts
-                        <div class="tags"><span class="tag">Chicken</span><span class="tag">High-Protein</span></div>
-                    </div>
-                    <div class="menu-item food-item" data-tags="vegetarian,vegan,gluten-free" data-source="staff">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Cauliflour
-                        <div class="tags"><span class="tag">Vegetarian</span><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
-                    </div>
-                    <div class="menu-item food-item" data-tags="contains-dairy,vegetarian" data-source="student">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Alfredo Sauce
-                        <div class="tags"><span class="tag">Contains-Dairy</span><span class="tag">Vegetarian</span></div>
-                    </div>
-                </div>
-
-                <div class="menu-array hidden" id="location5-array">
-                    <div class="menu-item food-item" data-tags="contains-dairy" data-source="guest">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Milk
-                        <div class="tags"><span class="tag">Contains-Dairy</span></div>
-                    </div>
-                    <div class="menu-item food-item" data-tags="vegan,gluten-free" data-source="staff">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Apple Juice
-                        <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
-                    </div>
-                    <div class="menu-item food-item" data-tags="vegan,gluten-free" data-source="student">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Gatorade
-                        <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
-                    </div>
-                </div>
-
-                <div class="menu-array hidden" id="location6-array">
-                    <div class="menu-item food-item" data-tags="vegan,gluten-free" data-source="guest">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Lettuce
-                        <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
-                    </div>
-                    <div class="menu-item food-item" data-tags="vegan,gluten-free" data-source="staff">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Cucumbers
-                        <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
-                    </div>
-                    <div class="menu-item food-item" data-tags="contains-gluten,vegetarian" data-source="student">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Croutons
-                        <div class="tags"><span class="tag">Contains-Gluten</span><span class="tag">Vegetarian</span></div>
-                    </div>
-                </div>
-
-                <div class="menu-array hidden" id="location7-array">
-                    <div class="menu-item food-item" data-tags="vegan,gluten-free" data-source="guest">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Cantaloupe
-                        <div class="tags"><span class="tag">Vegan</span><span class="tag">Gluten-Free</span></div>
-                    </div>
-                    <div class="menu-item food-item" data-tags="contains-dairy,vegetarian" data-source="staff">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Strawberry Yogurt
-                        <div class="tags"><span class="tag">Contains-Dairy</span><span class="tag">Vegetarian</span></div>
-                    </div>
-                    <div class="menu-item food-item" data-tags="vegan" data-source="student">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Frozen Bananas
-                        <div class="tags"><span class="tag">Vegan</span></div>
-                    </div>
-                </div>
-
-                <div class="menu-array hidden" id="location8-array">
-                    <div class="menu-item food-item" data-tags="contains-gluten,contains-dairy" data-source="guest">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Brownies
-                        <div class="tags"><span class="tag">Contains-Gluten</span><span class="tag">Contains-Dairy</span></div>
-                    </div>
-                    <div class="menu-item food-item" data-tags="contains-gluten,vegetarian" data-source="staff">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Oatmeal Rasin Cookies
-                        <div class="tags"><span class="tag">Contains-Gluten</span><span class="tag">Vegetarian</span></div>
-                    </div>
-                    <div class="menu-item food-item" data-tags="contains-gluten,contains-dairy" data-source="student">
-                        <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
-                        Cake Cuts
-                        <div class="tags"><span class="tag">Contains-Gluten</span><span class="tag">Contains-Dairy</span></div>
-                    </div>
-                </div>
+                <div class="menu-array" id="location1-array"></div>
+                <div class="menu-array hidden" id="location2-array"></div>
+                <div class="menu-array hidden" id="location3-array"></div>
+                <div class="menu-array hidden" id="location4-array"></div>
+                <div class="menu-array hidden" id="location5-array"></div>
+                <div class="menu-array hidden" id="location6-array"></div>
+                <div class="menu-array hidden" id="location7-array"></div>
+                <div class="menu-array hidden" id="location8-array"></div>
             </div>
 
             <style>
-                /* Mobile-specific layout for bottom menu (fixed at bottom) */
                 @media (max-width: 600px) {
                     .bottom-menu {
                         position: fixed;
@@ -988,11 +841,7 @@
                         gap: 12px;
                         overflow-x: auto;
                     }
-
-                    .menu-header {
-                        flex: 0 0 auto;
-                    }
-
+                    .menu-header { flex: 0 0 auto; }
                     .menu-array {
                         display: flex;
                         flex-direction: row;
@@ -1000,7 +849,6 @@
                         flex: 0 0 auto;
                         padding-bottom: 0;
                     }
-
                     .menu-item {
                         flex: 0 0 auto;
                         padding: 12px 20px;
@@ -1010,11 +858,7 @@
                         white-space: nowrap;
                     }
                 }
-
-                .hidden {
-                    display: none;
-                }
-
+                .hidden { display: none; }
                 .location-btn {
                     width: 100%;
                     padding: 10px 12px;
@@ -1027,19 +871,13 @@
                     font-weight: 500;
                     transition: all 0.2s ease;
                 }
-
-                .location-btn:hover {
-                    background: var(--bg);
-                    transform: translateY(-1px);
-                }
-
+                .location-btn:hover { background: var(--bg); transform: translateY(-1px); }
                 .location-btn.active {
                     background: var(--accent);
                     color: white;
                     transform: translateY(-1px);
                     box-shadow: 0 2px 4px rgba(91, 33, 182, 0.2);
                 }
-
                 .feedback-btn {
                     background: #ff3b30 !important;
                     color: white !important;
@@ -1048,32 +886,23 @@
                     border: none !important;
                     transition: all 0.2s ease;
                 }
-
                 .feedback-btn:hover {
                     transform: translateY(-1px);
                     box-shadow: 0 2px 4px rgba(255, 59, 48, 0.2);
                 }
-
-                .feedback-btn:active {
-                    transform: translateY(0);
-                }
-
                 .food-item {
                     cursor: pointer;
                     transition: all 0.2s ease;
                 }
-
                 .food-item:hover {
                     transform: translateY(-2px);
                     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
                 }
-
                 .food-item.selected {
                     border: 2px solid var(--accent) !important;
                     box-shadow: inset 0 0 0 1px var(--accent), 0 0 8px rgba(91, 33, 182, 0.3);
                     transform: scale(1.02);
                 }
-
                 .no-items-message {
                     display: none;
                     padding: 24px;
@@ -1088,11 +917,7 @@
                     background: #5e42a6;
                     z-index: 15;
                 }
-
-                .no-items-message:not(.hidden) {
-                    display: block;
-                }
-
+                .no-items-message:not(.hidden) { display: block; }
                 @media (min-width: 901px) {
                     .no-items-message {
                         position: absolute;
@@ -1108,7 +933,131 @@
             </style>
 
             <script>
-                // Get all elements
+                // --- DATA PERSISTENCE LAYER ---
+
+                // Unique ID Generator
+                function generateId() {
+                    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+                }
+
+                // Default Data (used if no local storage found)
+                const defaultData = [
+                    { id: generateId(), name: "Potatoes", tags: ["vegetarian","keto"], source: "staff", locationId: 1 },
+                    { id: generateId(), name: "Porkchops", tags: ["pork","contains-gluten"], source: "staff", locationId: 1 },
+                    { id: generateId(), name: "Tofu", tags: ["vegan","gluten-free"], source: "student", locationId: 1 },
+                    
+                    { id: generateId(), name: "Cheeseburger", tags: ["beef","contains-dairy"], source: "guest", locationId: 2 },
+                    { id: generateId(), name: "Hotdog", tags: ["pork"], source: "staff", locationId: 2 },
+                    { id: generateId(), name: "Fries", tags: ["vegan","vegetarian"], source: "student", locationId: 2 },
+
+                    { id: generateId(), name: "Pineapple Pizza", tags: ["contains-gluten","contains-dairy"], source: "guest", locationId: 3 },
+                    { id: generateId(), name: "Sausage Pizza", tags: ["contains-meat","contains-gluten"], source: "guest", locationId: 3 },
+                    { id: generateId(), name: "Stromboli", tags: ["contains-meat","contains-gluten"], source: "student", locationId: 3 },
+
+                    { id: generateId(), name: "Chicken Cuts", tags: ["chicken","high-protein"], source: "guest", locationId: 4 },
+                    { id: generateId(), name: "Cauliflour", tags: ["vegetarian","vegan","gluten-free"], source: "staff", locationId: 4 },
+                    { id: generateId(), name: "Alfredo Sauce", tags: ["contains-dairy","vegetarian"], source: "student", locationId: 4 },
+
+                    { id: generateId(), name: "Milk", tags: ["contains-dairy"], source: "guest", locationId: 5 },
+                    { id: generateId(), name: "Apple Juice", tags: ["vegan","gluten-free"], source: "staff", locationId: 5 },
+                    { id: generateId(), name: "Gatorade", tags: ["vegan","gluten-free"], source: "student", locationId: 5 },
+
+                    { id: generateId(), name: "Lettuce", tags: ["vegan","gluten-free"], source: "guest", locationId: 6 },
+                    { id: generateId(), name: "Cucumbers", tags: ["vegan","gluten-free"], source: "staff", locationId: 6 },
+                    { id: generateId(), name: "Croutons", tags: ["contains-gluten","vegetarian"], source: "student", locationId: 6 },
+
+                    { id: generateId(), name: "Cantaloupe", tags: ["vegan","gluten-free"], source: "guest", locationId: 7 },
+                    { id: generateId(), name: "Strawberry Yogurt", tags: ["contains-dairy","vegetarian"], source: "staff", locationId: 7 },
+                    { id: generateId(), name: "Frozen Bananas", tags: ["vegan"], source: "student", locationId: 7 },
+
+                    { id: generateId(), name: "Brownies", tags: ["contains-gluten","contains-dairy"], source: "guest", locationId: 8 },
+                    { id: generateId(), name: "Oatmeal Rasin Cookies", tags: ["contains-gluten","vegetarian"], source: "staff", locationId: 8 },
+                    { id: generateId(), name: "Cake Cuts", tags: ["contains-gluten","contains-dairy"], source: "student", locationId: 8 }
+                ];
+
+                let allFoodItems = [];
+
+                // Save to Browser Storage
+                function saveData() {
+                    try {
+                        localStorage.setItem('dining_deluxe_items', JSON.stringify(allFoodItems));
+                    } catch (e) {
+                        console.error("Storage limit reached or error saving", e);
+                        alert("Storage limit reached. Some images may not save.");
+                    }
+                }
+
+                // Load from Browser Storage
+                function loadData() {
+                    const stored = localStorage.getItem('dining_deluxe_items');
+                    if (stored) {
+                        try {
+                            allFoodItems = JSON.parse(stored);
+                        } catch(e) {
+                            console.error("Error parsing data", e);
+                            allFoodItems = [...defaultData];
+                        }
+                    } else {
+                        allFoodItems = [...defaultData];
+                    }
+                    renderAllItems();
+                }
+
+                // Reset Data Button
+                document.getElementById('resetDataBtn').addEventListener('click', () => {
+                    if(confirm("Are you sure you want to reset all data to default? You will lose custom items.")) {
+                        localStorage.removeItem('dining_deluxe_items');
+                        location.reload();
+                    }
+                });
+
+                // Render all items to the DOM based on the data array
+                function renderAllItems() {
+                    // Clear existing HTML in arrays
+                    document.querySelectorAll('.menu-array').forEach(el => el.innerHTML = '');
+
+                    // Loop through data and build HTML
+                    allFoodItems.forEach(item => {
+                        const container = document.getElementById(`location${item.locationId}-array`);
+                        if (container) {
+                            const div = document.createElement('div');
+                            div.className = 'menu-item food-item';
+                            div.dataset.tags = item.tags.join(',');
+                            div.dataset.source = item.source;
+                            div.dataset.id = item.id; // Store ID in DOM
+                            
+                            // Image
+                            let imgHtml = '';
+                            if (item.image) {
+                                imgHtml = `<img src="${item.image}" class="food-thumbnail" alt="${item.name}">`;
+                            }
+
+                            // Tags HTML
+                            const tagsHtml = item.tags.map(tag => {
+                                const label = tag.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                                return `<span class="tag">${label}</span>`;
+                            }).join('');
+
+                            div.innerHTML = `
+                                <button type="button" class="food-item-delete" aria-label="Delete item">✕</button>
+                                ${imgHtml}
+                                ${item.name}
+                                <div class="tags">${tagsHtml}</div>
+                            `;
+
+                            container.appendChild(div);
+                        }
+                    });
+
+                    // After rendering, re-apply filters and handlers
+                    // Note: Event listeners for delete/click are handled via delegation now (see below),
+                    // so we don't need to re-attach them to every element individually.
+                    applySourceFilter();
+                }
+
+
+                // --- APP LOGIC ---
+
                 const locationButtons = document.querySelectorAll('.location-btn');
                 const menuArrays = document.querySelectorAll('.menu-array');
                 const mapMarkers = document.querySelectorAll('.map-marker');
@@ -1123,13 +1072,11 @@
                 const modalTagsList = document.getElementById('modalTagsList');
                 const modalLocationsList = document.getElementById('modalLocationsList');
 
-                // Search elements
                 const searchBtn = document.querySelector('.search-btn');
                 const searchBox = document.querySelector('.search-box');
                 const searchInput = document.querySelector('.search-input');
                 const tagListEl = document.querySelector('.tag-list');
 
-                // Filter elements
                 const filterBtn = document.querySelector('.filter-btn');
                 const filterModal = document.getElementById('filterModal');
                 const filterCloseBtn = document.getElementById('filterCloseBtn');
@@ -1140,120 +1087,105 @@
                 const modeBtnStudent = document.getElementById('modeBtnStudent');
                 const modeBtnStaff = document.getElementById('modeBtnStaff');
 
-                // Image upload elements
                 const imageInput = document.getElementById('imageInput');
                 const imageUploadBtn = document.getElementById('imageUploadBtn');
                 const imagePreview = document.getElementById('imagePreview');
                 let selectedImage = null;
 
-                // Tag selection state
                 const selectedTags = new Set();
                 const modalSelectedTags = new Set();
                 let modalSelectedLocation = null;
-                let allTags = []; // list of available tag keys
-                let currentSubmissionMode = 'guest'; // Default submission mode
-                let isSearchMode = false; // Track if search is active
-                let lastActiveLocationIndex = 0; // Remember last active location
+                let currentSubmissionMode = 'guest';
+                let isSearchMode = false;
 
-                // Function to validate form
+                // Event Delegation for Food Item Clicks & Delete
+                document.querySelector('.bottom-menu').addEventListener('click', (e) => {
+                    
+                    // Handle Delete
+                    if (e.target.classList.contains('food-item-delete')) {
+                        e.stopPropagation();
+                        const foodItem = e.target.closest('.food-item');
+                        const idToDelete = foodItem.dataset.id;
+                        
+                        if(confirm("Delete this item?")) {
+                            // Update Data
+                            allFoodItems = allFoodItems.filter(item => item.id !== idToDelete);
+                            saveData();
+                            // Update UI
+                            renderAllItems();
+                            // If searching, re-filter
+                            if(isSearchMode) filterItems();
+                        }
+                        return;
+                    }
+
+                    // Handle Selection
+                    const foodItem = e.target.closest('.food-item');
+                    if (foodItem) {
+                         const menuArray = foodItem.closest('.menu-array');
+                         if (!menuArray) return;
+                         const match = menuArray.id.match(/location(\d+)-array/);
+                         if (!match) return;
+                         const locationIndex = parseInt(match[1], 10) - 1;
+
+                         document.querySelectorAll('.food-item.selected').forEach(fi => fi.classList.remove('selected'));
+                         foodItem.classList.add('selected');
+
+                         removeActiveState();
+                         if (locationButtons[locationIndex]) locationButtons[locationIndex].classList.add('active');
+                         if (mapMarkers[locationIndex]) mapMarkers[locationIndex].classList.add('active');
+                    }
+                });
+
                 function validateModalForm() {
                     const hasName = foodNameInput.value.trim().length > 0;
                     const hasTags = modalSelectedTags.size > 0;
                     const hasLocation = modalSelectedLocation !== null;
-                    const isValid = hasName && hasTags && hasLocation;
-                    modalSubmitBtn.disabled = !isValid;
+                    modalSubmitBtn.disabled = !(hasName && hasTags && hasLocation);
                 }
 
-                // Filter button opens modal
                 if (filterBtn && filterModal) {
-                    filterBtn.addEventListener('click', () => {
-                        filterModal.classList.add('active');
-                    });
-                }
-
-                // Filter modal close button
-                if (filterCloseBtn && filterModal) {
-                    filterCloseBtn.addEventListener('click', () => {
-                        filterModal.classList.remove('active');
-                    });
-                }
-
-                // Filter checkboxes apply filter on change
-                if (filterGuests || filterStudents || filterStaff) {
-                    [filterGuests, filterStudents, filterStaff].forEach(checkbox => {
-                        if (checkbox) {
-                            checkbox.addEventListener('change', () => {
-                                applySourceFilter();
-                            });
-                        }
-                    });
-                }
-
-                // Mode buttons - switch submission mode
-                const modeButtons = [modeBtnGuest, modeBtnStudent, modeBtnStaff];
-                if (modeBtnGuest || modeBtnStudent || modeBtnStaff) {
-                    modeButtons.forEach(btn => {
-                        if (btn) {
-                            btn.addEventListener('click', (e) => {
-                                e.preventDefault();
-                                // Remove active from all
-                                modeButtons.forEach(b => b.classList.remove('active'));
-                                // Add active to clicked
-                                btn.classList.add('active');
-                                // Update current mode
-                                currentSubmissionMode = btn.dataset.mode;
-                                // Update delete button visibility
-                                updateDeleteButtonVisibility();
-                            });
-                        }
-                    });
-                }
-
-                // Close filter modal when clicking outside
-                if (filterModal) {
+                    filterBtn.addEventListener('click', () => filterModal.classList.add('active'));
+                    filterCloseBtn.addEventListener('click', () => filterModal.classList.remove('active'));
                     filterModal.addEventListener('click', (e) => {
-                        if (e.target === filterModal) {
-                            filterModal.classList.remove('active');
-                        }
+                        if (e.target === filterModal) filterModal.classList.remove('active');
                     });
                 }
 
-                // Function to apply source filtering
+                if (filterGuests) filterGuests.addEventListener('change', applySourceFilter);
+                if (filterStudents) filterStudents.addEventListener('change', applySourceFilter);
+                if (filterStaff) filterStaff.addEventListener('change', applySourceFilter);
+
+                [modeBtnGuest, modeBtnStudent, modeBtnStaff].forEach(btn => {
+                    if (btn) {
+                        btn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            document.querySelectorAll('.filter-mode-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            currentSubmissionMode = btn.dataset.mode;
+                            updateDeleteButtonVisibility();
+                        });
+                    }
+                });
+
                 function applySourceFilter() {
                     filterItems();
+                    updateDeleteButtonVisibility();
                 }
 
-                // Function to update delete button visibility based on mode
                 function updateDeleteButtonVisibility() {
                     const isStaffMode = currentSubmissionMode === 'staff';
                     document.querySelectorAll('.food-item').forEach(item => {
-                        if (isStaffMode) {
-                            item.classList.add('show-delete');
-                        } else {
-                            item.classList.remove('show-delete');
-                        }
+                        if (isStaffMode) item.classList.add('show-delete');
+                        else item.classList.remove('show-delete');
                     });
                 }
 
-                // Add delete button handlers to existing items
-                function attachDeleteHandlers() {
-                    document.querySelectorAll('.food-item-delete').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            const foodItem = btn.closest('.food-item');
-                            if (foodItem) {
-                                foodItem.remove();
-                            }
-                        });
-                    });
-                }
-
-                // Feedback button opens modal
-                if (feedbackBtn && feedbackModal) {
+                // Feedback Modal Logic
+                if (feedbackBtn) {
                     feedbackBtn.addEventListener('click', () => {
                         feedbackModal.classList.add('active');
                         foodNameInput.focus();
-                        // Build modal tag list if not already built
                         if (modalTagsList.children.length === 0) {
                             buildModalTagList();
                             buildModalLocationList();
@@ -1262,84 +1194,50 @@
                     });
                 }
 
-                // Add input event listener to food name input
-                if (foodNameInput) {
-                    foodNameInput.addEventListener('input', () => {
-                        validateModalForm();
-                    });
+                if (foodNameInput) foodNameInput.addEventListener('input', validateModalForm);
+
+                if (modalCancelBtn) {
+                    modalCancelBtn.addEventListener('click', closeModal);
                 }
 
-                // Modal cancel button
-                if (modalCancelBtn && feedbackModal) {
-                    modalCancelBtn.addEventListener('click', () => {
-                        feedbackModal.classList.remove('active');
-                        foodNameInput.value = '';
-                        modalSelectedTags.clear();
-                        modalSelectedLocation = null;
-                        selectedImage = null;
-                        imagePreview.innerHTML = '';
-                        imagePreview.classList.remove('active');
-                        document.querySelectorAll('.modal-tag-btn').forEach(btn => btn.classList.remove('selected'));
-                        document.querySelectorAll('.modal-location-btn').forEach(btn => btn.classList.remove('selected'));
-                    });
+                function closeModal() {
+                    feedbackModal.classList.remove('active');
+                    foodNameInput.value = '';
+                    modalSelectedTags.clear();
+                    modalSelectedLocation = null;
+                    selectedImage = null;
+                    imagePreview.innerHTML = '';
+                    imagePreview.classList.remove('active');
+                    document.querySelectorAll('.modal-tag-btn').forEach(btn => btn.classList.remove('selected'));
+                    document.querySelectorAll('.modal-location-btn').forEach(btn => btn.classList.remove('selected'));
                 }
 
-                // Image upload button
                 if (imageUploadBtn && imageInput) {
-                    imageUploadBtn.addEventListener('click', () => {
-                        imageInput.click();
-                    });
-                }
-
-                // Image input change handler
-                if (imageInput) {
+                    imageUploadBtn.addEventListener('click', () => imageInput.click());
                     imageInput.addEventListener('change', (e) => {
                         const file = e.target.files[0];
                         if (file && file.type.startsWith('image/')) {
                             const reader = new FileReader();
                             reader.onload = (event) => {
                                 selectedImage = event.target.result;
-                                // Display preview
                                 imagePreview.innerHTML = `
-                                    <img src="${selectedImage}" alt="Food image preview">
-                                    <button type="button" class="modal-image-remove" aria-label="Remove image">✕</button>
+                                    <img src="${selectedImage}" alt="Preview">
+                                    <button type="button" class="modal-image-remove">✕</button>
                                 `;
                                 imagePreview.classList.add('active');
-                                
-                                // Add remove button handler
-                                const removeBtn = imagePreview.querySelector('.modal-image-remove');
-                                if (removeBtn) {
-                                    removeBtn.addEventListener('click', () => {
-                                        selectedImage = null;
-                                        imagePreview.innerHTML = '';
-                                        imagePreview.classList.remove('active');
-                                        imageInput.value = '';
-                                    });
-                                }
+                                imagePreview.querySelector('.modal-image-remove').addEventListener('click', () => {
+                                    selectedImage = null;
+                                    imagePreview.innerHTML = '';
+                                    imagePreview.classList.remove('active');
+                                    imageInput.value = '';
+                                });
                             };
                             reader.readAsDataURL(file);
                         }
                     });
                 }
 
-                // Close modal when clicking outside
-                if (feedbackModal) {
-                    feedbackModal.addEventListener('click', (e) => {
-                        if (e.target === feedbackModal) {
-                            feedbackModal.classList.remove('active');
-                            foodNameInput.value = '';
-                            modalSelectedTags.clear();
-                            modalSelectedLocation = null;
-                            selectedImage = null;
-                            imagePreview.innerHTML = '';
-                            imagePreview.classList.remove('active');
-                            document.querySelectorAll('.modal-tag-btn').forEach(btn => btn.classList.remove('selected'));
-                            document.querySelectorAll('.modal-location-btn').forEach(btn => btn.classList.remove('selected'));
-                        }
-                    });
-                }
-
-                // Modal submit button
+                // SUBMIT NEW ITEM
                 if (modalSubmitBtn) {
                     modalSubmitBtn.addEventListener('click', () => {
                         const foodName = foodNameInput.value.trim();
@@ -1347,90 +1245,39 @@
                         const locationIndex = modalSelectedLocation;
 
                         if (foodName && selectedTagsArray.length > 0 && locationIndex !== null) {
-                            // Create new food item
-                            const newFoodItem = document.createElement('div');
-                            newFoodItem.className = 'menu-item food-item';
-                            newFoodItem.dataset.tags = selectedTagsArray.join(',');
-                            newFoodItem.dataset.source = currentSubmissionMode; // Use current mode
+                            // Create Data Object
+                            const newItem = {
+                                id: generateId(),
+                                name: foodName,
+                                tags: selectedTagsArray,
+                                locationId: locationIndex + 1, // Store as 1-based index
+                                source: currentSubmissionMode,
+                                image: selectedImage
+                            };
+
+                            // Add to Data Array
+                            allFoodItems.push(newItem);
                             
-                            // Build delete button HTML
-                            const deleteBtn = document.createElement('button');
-                            deleteBtn.type = 'button';
-                            deleteBtn.className = 'food-item-delete';
-                            deleteBtn.setAttribute('aria-label', 'Delete item');
-                            deleteBtn.textContent = '✕';
+                            // Save
+                            saveData();
+
+                            // Re-render
+                            renderAllItems();
                             
-                            // Build tags HTML
-                            const tagsHtml = selectedTagsArray.map(tag => {
-                                const label = tag.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                                return `<span class="tag">${label}</span>`;
-                            }).join('');
-
-                            newFoodItem.appendChild(deleteBtn);
-                            const textNode = document.createTextNode(foodName);
-                            newFoodItem.appendChild(textNode);
-                            
-                            const tagsDiv = document.createElement('div');
-                            tagsDiv.className = 'tags';
-                            tagsDiv.innerHTML = tagsHtml;
-                            newFoodItem.appendChild(tagsDiv);
-
-                            // Add to the correct location array
-                            const targetArray = document.getElementById(`location${locationIndex + 1}-array`);
-                            if (targetArray) {
-                                targetArray.appendChild(newFoodItem);
-                            }
-
-                            // Attach delete handler to new item
-                            attachDeleteHandlers();
-                            // Attach click handler for location highlighting
-                            attachFoodItemClickHandlers();
-                            // Update delete button visibility
-                            updateDeleteButtonVisibility();
-
-                            // Close modal and reset
-                            feedbackModal.classList.remove('active');
-                            foodNameInput.value = '';
-                            modalSelectedTags.clear();
-                            modalSelectedLocation = null;
-                            selectedImage = null;
-                            imagePreview.innerHTML = '';
-                            imagePreview.classList.remove('active');
-                            imageInput.value = '';
-                            document.querySelectorAll('.modal-tag-btn').forEach(btn => btn.classList.remove('selected'));
-                            document.querySelectorAll('.modal-location-btn').forEach(btn => btn.classList.remove('selected'));
-                            validateModalForm();
+                            // Close & Reset
+                            closeModal();
                         }
                     });
                 }
 
-                // Build tag list for modal - persistent list not dependent on existing items
                 function buildModalTagList() {
-                    // Hardcoded persistent list of all available tags
-                    const persistentTags = [
-                        'beef',
-                        'chicken',
-                        'contains-dairy',
-                        'contains-gluten',
-                        'contains-meat',
-                        'gluten-free',
-                        'high-protein',
-                        'keto',
-                        'pork',
-                        'vegan',
-                        'vegetarian'
-                    ];
-
-                    allTags = persistentTags;
-                    allTags.forEach(tagKey => {
+                    const persistentTags = ['beef','chicken','contains-dairy','contains-gluten','contains-meat','gluten-free','high-protein','keto','pork','vegan','vegetarian'];
+                    persistentTags.forEach(tagKey => {
                         const btn = document.createElement('button');
                         btn.type = 'button';
                         btn.className = 'modal-tag-btn';
-                        btn.dataset.tag = tagKey;
-                        const label = tagKey.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                        btn.textContent = label;
-                        btn.addEventListener('click', (e) => {
-                            e.preventDefault();
+                        btn.textContent = tagKey.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                        btn.addEventListener('click', () => {
                             if (modalSelectedTags.has(tagKey)) {
                                 modalSelectedTags.delete(tagKey);
                                 btn.classList.remove('selected');
@@ -1444,21 +1291,15 @@
                     });
                 }
 
-                // Build location list for modal
                 function buildModalLocationList() {
                     const locations = ['Main Line', 'The Grill', 'Pasta & Pizza', 'Custom Pastas', 'Drink Line', 'Salad Bar', 'Fruit & Yogurt', 'Sweet Treats'];
-                    
                     locations.forEach((locName, locIndex) => {
                         const btn = document.createElement('button');
                         btn.type = 'button';
                         btn.className = 'modal-tag-btn modal-location-btn';
-                        btn.dataset.location = locIndex;
                         btn.textContent = locName;
-                        btn.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            // Remove selected from all location buttons
+                        btn.addEventListener('click', () => {
                             document.querySelectorAll('.modal-location-btn').forEach(b => b.classList.remove('selected'));
-                            // Add selected to clicked button
                             btn.classList.add('selected');
                             modalSelectedLocation = locIndex;
                             validateModalForm();
@@ -1467,322 +1308,169 @@
                     });
                 }
 
-                // Location toggle behavior
                 if (locationToggleBtn && locationList) {
                     locationToggleBtn.addEventListener('click', (e) => {
                         const isCollapsed = locationList.classList.toggle('collapsed');
-                        locationToggleBtn.setAttribute('aria-expanded', !isCollapsed ? 'true' : 'false');
+                        locationToggleBtn.setAttribute('aria-expanded', !isCollapsed);
                         locationToggleBtn.textContent = isCollapsed ? '▶' : '▼';
                         e.stopPropagation();
                     });
                 }
 
-                // Function to hide all arrays
                 function hideAllArrays() {
                     menuArrays.forEach(array => array.classList.add('hidden'));
                 }
 
-                // Function to remove active state from all buttons
                 function removeActiveState() {
                     locationButtons.forEach(btn => btn.classList.remove('active'));
                     mapMarkers.forEach(marker => marker.classList.remove('active'));
                 }
 
-                // Add click event listeners to each location button
                 locationButtons.forEach((button, index) => {
                     button.addEventListener('click', () => {
-                        // Check if this location is already selected
                         const isAlreadySelected = button.classList.contains('active');
                         
-                        // Close search if it's open
                         if (isSearchMode) {
                             isSearchMode = false;
                             searchBox.classList.add('hidden');
-                            searchBox.setAttribute('aria-hidden', 'true');
                             tagListEl.classList.add('hidden');
-                            tagListEl.setAttribute('aria-hidden', 'true');
                             searchInput.value = '';
                             clearSelectedTags();
                         }
                         
                         if (isAlreadySelected) {
-                            // Toggle off: show all items
                             removeActiveState();
                             menuArrays.forEach(arr => arr.classList.remove('hidden'));
                             noItemsMessage.classList.add('hidden');
                         } else {
-                            // Toggle on: show only this location
                             hideAllArrays();
                             removeActiveState();
                             
-                            // Remember this location
-                            lastActiveLocationIndex = index;
-                            
-                            // Show the corresponding array
                             const arrayId = `location${index + 1}-array`;
                             const targetArray = document.getElementById(arrayId);
                             if (targetArray) {
                                 targetArray.classList.remove('hidden');
                                 button.classList.add('active');
+                                if (mapMarkers[index]) mapMarkers[index].classList.add('active');
                                 
-                                // Activate corresponding map marker
-                                const marker = document.querySelector(`.map-marker[data-location="${index + 1}"]`);
-                                if (marker) {
-                                    marker.classList.add('active');
-                                }
-                                
-                                // Check if any items are visible in this location
                                 const visibleItems = Array.from(targetArray.querySelectorAll('.food-item:not(.item-hidden)')).length;
-                                if (visibleItems === 0) {
-                                    noItemsMessage.classList.remove('hidden');
-                                } else {
-                                    noItemsMessage.classList.add('hidden');
-                                }
+                                noItemsMessage.classList.toggle('hidden', visibleItems > 0);
                             }
                         }
                     });
                 });
 
-                // Search toggle behavior
-                if (searchBtn && searchBox && searchInput && tagListEl) {
+                if (searchBtn) {
                     searchBtn.addEventListener('click', (e) => {
-                        // Toggle search mode
                         isSearchMode = !isSearchMode;
-                        
                         if (isSearchMode) {
-                            // Entering search mode: show search box and tags
                             searchBox.classList.remove('hidden');
-                            searchBox.setAttribute('aria-hidden', 'false');
-
-                            // Show tag list
                             tagListEl.classList.remove('hidden');
-                            tagListEl.setAttribute('aria-hidden', 'false');
-
-                            // Build tag buttons if needed
                             buildTagButtons();
                             setTimeout(() => searchInput.focus(), 0);
-                            
-                            // Remove highlighting from locations and markers (but keep them visible)
                             removeActiveState();
-                            
-                            // Show all items when search opens
                             filterItems();
                         } else {
-                            // Exiting search mode: return to location mode
                             searchBox.classList.add('hidden');
-                            searchBox.setAttribute('aria-hidden', 'true');
                             tagListEl.classList.add('hidden');
-                            tagListEl.setAttribute('aria-hidden', 'true');
-                            
-                            // Clear search input and tags
                             searchInput.value = '';
                             clearSelectedTags();
-                            
-                            // Check if any location button is currently active
+                            // Reset view
                             const activeLocationBtn = document.querySelector('.location-btn.active');
-                            
-                            if (activeLocationBtn) {
-                                // A location is selected, keep showing that location
-                                // Re-apply filter to show all items for the location
-                                filterItems();
-                            } else {
-                                // No location selected, show all items
-                                removeActiveState();
+                            if (!activeLocationBtn) {
                                 menuArrays.forEach(arr => arr.classList.remove('hidden'));
-                                filterItems();
                             }
+                            filterItems();
                         }
                         e.stopPropagation();
                     });
 
-                    // Close on Escape
-                    searchInput.addEventListener('keydown', (evt) => {
-                        if (evt.key === 'Escape' || evt.key === 'Esc') {
-                            searchBox.classList.add('hidden');
-                            searchBox.setAttribute('aria-hidden', 'true');
-                            searchBtn.focus();
-                        }
-                    });
-                    // Live filtering: match against item text and data-tags
-                    searchInput.addEventListener('input', (evt) => {
-                        filterItems();
-                    });
+                    searchInput.addEventListener('input', filterItems);
 
-                    // Build tag buttons from existing items
                     function buildTagButtons() {
-                        // If already built, do nothing
-                        if (tagListEl.dataset.built === '1') return;
-
                         const tagSet = new Set();
-                        document.querySelectorAll('.food-item').forEach(it => {
-                            const tags = (it.dataset.tags || '').split(',').map(t => t.trim()).filter(Boolean);
-                            tags.forEach(t => tagSet.add(t));
-                        });
-
-                        allTags = Array.from(tagSet).sort();
+                        allFoodItems.forEach(item => item.tags.forEach(t => tagSet.add(t)));
+                        
                         tagListEl.innerHTML = '';
-                        allTags.forEach(tagKey => {
+                        Array.from(tagSet).sort().forEach(tagKey => {
                             const btn = document.createElement('button');
-                            btn.type = 'button';
                             btn.className = 'tag-btn';
-                            btn.dataset.tag = tagKey;
-                            // Display label: replace hyphens with spaces and Title Case
-                            const label = tagKey.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                            btn.textContent = label;
+                            btn.textContent = tagKey.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
                             btn.addEventListener('click', () => {
-                                toggleTagSelection(tagKey, btn);
+                                if (selectedTags.has(tagKey)) {
+                                    selectedTags.delete(tagKey);
+                                    btn.classList.remove('active');
+                                } else {
+                                    selectedTags.add(tagKey);
+                                    btn.classList.add('active');
+                                }
+                                filterItems();
                             });
                             tagListEl.appendChild(btn);
                         });
-                        tagListEl.dataset.built = '1';
-                    }
-
-                    function toggleTagSelection(tagKey, btn) {
-                        if (selectedTags.has(tagKey)) {
-                            selectedTags.delete(tagKey);
-                            btn.classList.remove('active');
-                        } else {
-                            selectedTags.add(tagKey);
-                            btn.classList.add('active');
-                        }
-                        // When tag selection changes, run filter
-                        filterItems();
                     }
 
                     function clearSelectedTags() {
                         selectedTags.clear();
                         tagListEl.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
                     }
-
-                    function filterItems() {
-                        const q = (searchInput.value || '').trim().toLowerCase();
-                        const showGuests = filterGuests.checked;
-                        const showStudents = filterStudents.checked;
-                        const showStaff = filterStaff.checked;
-
-                        document.querySelectorAll('.menu-array').forEach(arr => {
-                            const items = Array.from(arr.querySelectorAll('.food-item'));
-                            let anyVisible = false;
-                            items.forEach(it => {
-                                const text = (it.textContent || '').toLowerCase();
-                                const tags = (it.dataset.tags || '').toLowerCase();
-                                const source = it.dataset.source || 'staff'; // Default to staff for original items
-
-                                // Text match
-                                const matchesText = !q || text.includes(q) || tags.split(',').some(t => t.trim().includes(q));
-
-                                // Tag match: if none selected, it's a match; otherwise OR-match any selected tag
-                                let matchesTag = true;
-                                if (selectedTags.size > 0) {
-                                    const itemTags = (it.dataset.tags || '').split(',').map(t => t.trim()).filter(Boolean);
-                                    matchesTag = itemTags.some(t => selectedTags.has(t));
-                                }
-
-                                // Source match: check if the item's source is enabled in the filter
-                                let matchesSource = false;
-                                if (source === 'guest' && showGuests) matchesSource = true;
-                                if (source === 'student' && showStudents) matchesSource = true;
-                                if (source === 'staff' && showStaff) matchesSource = true;
-
-                                const show = matchesText && matchesTag && matchesSource;
-                                if (show) {
-                                    it.classList.remove('item-hidden');
-                                    it.style.display = '';
-                                    anyVisible = true;
-                                } else {
-                                    it.classList.add('item-hidden');
-                                    it.style.display = 'none';
-                                }
-                            });
-
-                            // Hide/show arrays based on visibility of items
-                            // Location buttons always stay visible
-                            if (!anyVisible) {
-                                arr.classList.add('hidden');
-                            } else {
-                                arr.classList.remove('hidden');
-                            }
-                        });
-
-                        // Check if a location is currently selected and show/hide no items message
-                        const activeLocationBtn = document.querySelector('.location-btn.active');
-                        if (activeLocationBtn) {
-                            const activeIndex = Array.from(locationButtons).indexOf(activeLocationBtn);
-                            const activeArray = document.getElementById(`location${activeIndex + 1}-array`);
-                            if (activeArray && !activeArray.classList.contains('hidden')) {
-                                const visibleItems = Array.from(activeArray.querySelectorAll('.food-item:not(.item-hidden)')).length;
-                                if (visibleItems === 0) {
-                                    noItemsMessage.classList.remove('hidden');
-                                } else {
-                                    noItemsMessage.classList.add('hidden');
-                                }
-                            }
-                        }
-                    }
                 }
 
-                // Show all locations' arrays by default (no selection)
-                menuArrays.forEach(arr => arr.classList.remove('hidden'));
-                // Don't highlight any location button or marker
-                // locationButtons and mapMarkers remain unselected
+                function filterItems() {
+                    const q = (searchInput.value || '').trim().toLowerCase();
+                    const showGuests = filterGuests.checked;
+                    const showStudents = filterStudents.checked;
+                    const showStaff = filterStaff.checked;
 
-                // Function to handle food item clicks
-                function attachFoodItemClickHandlers() {
-                    document.querySelectorAll('.food-item').forEach(item => {
-                        // Only attach click handler if not already attached
-                        if (item.dataset.clickHandlerAttached !== '1') {
-                            item.addEventListener('click', (e) => {
-                                // Don't trigger if delete button was clicked
-                                if (e.target.classList.contains('food-item-delete')) {
-                                    return;
-                                }
+                    document.querySelectorAll('.menu-array').forEach(arr => {
+                        const items = Array.from(arr.querySelectorAll('.food-item'));
+                        let anyVisible = false;
+                        items.forEach(it => {
+                            const text = (it.textContent || '').toLowerCase();
+                            const tags = (it.dataset.tags || '').toLowerCase();
+                            const source = it.dataset.source || 'staff';
 
-                                // Find which location this food item belongs to
-                                const menuArray = item.closest('.menu-array');
-                                if (!menuArray) return;
+                            const matchesText = !q || text.includes(q) || tags.split(',').some(t => t.trim().includes(q));
+                            
+                            let matchesTag = true;
+                            if (selectedTags.size > 0) {
+                                const itemTags = (it.dataset.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+                                matchesTag = itemTags.some(t => selectedTags.has(t));
+                            }
 
-                                const match = menuArray.id.match(/location(\d+)-array/);
-                                if (!match) return;
+                            let matchesSource = false;
+                            if (source === 'guest' && showGuests) matchesSource = true;
+                            if (source === 'student' && showStudents) matchesSource = true;
+                            if (source === 'staff' && showStaff) matchesSource = true;
 
-                                const locationIndex = parseInt(match[1], 10) - 1;
+                            const show = matchesText && matchesTag && matchesSource;
+                            it.style.display = show ? '' : 'none';
+                            it.classList.toggle('item-hidden', !show);
+                            if (show) anyVisible = true;
+                        });
 
-                                // Remove selected state from all food items
-                                document.querySelectorAll('.food-item.selected').forEach(fi => {
-                                    fi.classList.remove('selected');
-                                });
-
-                                // Add selected state to clicked item
-                                item.classList.add('selected');
-
-                                // Highlight the location button
-                                removeActiveState();
-                                if (locationButtons[locationIndex]) {
-                                    locationButtons[locationIndex].classList.add('active');
-                                }
-
-                                // Highlight the map marker
-                                if (mapMarkers[locationIndex]) {
-                                    mapMarkers[locationIndex].classList.add('active');
-                                }
-                            });
-                            item.dataset.clickHandlerAttached = '1';
+                        // Only hide array container if we are NOT in specific location mode
+                        const activeLocationBtn = document.querySelector('.location-btn.active');
+                        if (!activeLocationBtn) {
+                             // Global view or search view: hide array if empty
+                             arr.classList.toggle('hidden', !anyVisible);
+                        } else {
+                             // Location selected: container logic handled by location button click, 
+                             // but we check if empty to show "No items"
+                             const activeIndex = Array.from(locationButtons).indexOf(activeLocationBtn);
+                             if(arr.id === `location${activeIndex+1}-array`) {
+                                 noItemsMessage.classList.toggle('hidden', anyVisible);
+                             }
                         }
                     });
                 }
 
-                // Initialize delete handlers and visibility
-                attachDeleteHandlers();
-                updateDeleteButtonVisibility();
+                // INITIALIZE
+                loadData();
 
-                // Initialize food item click handlers
-                attachFoodItemClickHandlers();
-
-                // Initialize filter on page load
-                filterItems();
             </script>
     </div>
- 		<!-- Footer -->
-			<footer id="footer" class="wrapper style1-alt">
+ 		<footer id="footer" class="wrapper style1-alt">
 				<div class="inner">
 					<ul class="menu">
 						<li>&copy; Untitled. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
