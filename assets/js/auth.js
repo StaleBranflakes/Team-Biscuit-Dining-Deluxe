@@ -3,13 +3,10 @@
 // This script mimics a database using the browser's LocalStorage.
 // Data is saved to the browser, so it persists even if you refresh.
 
-// assets/js/auth.js
-
 const DB_KEY = 'uncp_dining_users';
 const SESSION_KEY = 'uncp_current_user';
 
 // --- REGISTER FUNCTION ---
-// Now accepts 'role' parameter
 function registerUser(username, password, role) {
     let users = JSON.parse(localStorage.getItem(DB_KEY)) || [];
 
@@ -19,7 +16,7 @@ function registerUser(username, password, role) {
         return false;
     }
 
-    // Save user with role
+    // Save user with their selected role
     users.push({ 
         username: username, 
         password: password,
@@ -39,9 +36,9 @@ function loginUser(username, password) {
     const validUser = users.find(u => u.username === username && u.password === password);
 
     if (validUser) {
-        // Save entire user object (including role) to session
+        // Save the current session
         localStorage.setItem(SESSION_KEY, JSON.stringify(validUser));
-        alert("Login successful! Role: " + (validUser.role || 'base'));
+        alert("Login successful! Welcome, " + validUser.username + " (" + (validUser.role || 'base') + ")");
         window.location.href = 'Map.html';
         return true;
     } else {
@@ -53,7 +50,7 @@ function loginUser(username, password) {
 // --- LOGOUT FUNCTION ---
 function logoutUser() {
     localStorage.removeItem(SESSION_KEY);
-    window.location.href = 'Login.html';
+    window.location.href = 'Home.html'; 
 }
 
 // --- GET CURRENT USER ---
