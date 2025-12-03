@@ -3,11 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>Register - UNCP Dining Deluxe</title>
 
     <link rel="stylesheet" href="../assets/css/fontawesome-all.min.css">
     <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="../assets/css/noscript.css">
+    <style>
+        /* Style for the role dropdown */
+        select {
+            width: 100%;
+            padding: 0.75em;
+            margin-bottom: 1em;
+            border: solid 1px rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            background: #ffffff;
+            color: #3d1a5f;
+        }
+    </style>
 </head>
 
 <body>
@@ -16,10 +28,8 @@
         <nav>
             <ul>
                 <li><a href="Home.html">Home</a></li>
-                <li><a href="Menu.html" class="active">Menu</a></li>
-                <li><a href="About.html">About</a></li>
+                <li><a href="Map.html">Map</a></li>
                 <li><a href="Login.html">Login</a></li>
-                <li><a href="Contact.html">Contact</a></li>
             </ul>
         </nav>
     </header>
@@ -27,7 +37,6 @@
     <main>
         <div style="padding: 2em; max-width: 600px; margin: 0 auto;">
             <h2>Register Here</h2>
-            <!-- Removed PHP Action, added ID for JS -->
             <form id="registerForm">
                     <div>
                         <label for="fname">First Name: </label>
@@ -45,62 +54,60 @@
                     </div>
 
                     <div>
-                        <label for="username">Username:</label> 
-                        
+                        <label for="role">Account Role: </label>
+                        <select id="role" name="role">
+                            <option value="base">Student / Guest (View Only)</option>
+                            <option value="admin">Administrator (Add/Remove Items)</option>
+                        </select>
                     </div>
 
                     <div>
+                        <label for="username">Username:</label> 
                         <input type="text" id="username" name="username" required>
                     </div>
 
                     <div>
                         <label for="password">Password:</label>
-                    </div>
-
-                    <div>
                         <input type="password" id="password" name="password" required>
                     </div>
 
                     <div>
                         <label for="confirmPW">Confirm Password: </label>
-                        <input type="text" id="confirmPW" name="confirmPW" required>
+                        <input type="password" id="confirmPW" name="confirmPW" required>
                     </div>
 
-                    <div>
-                        <button type="submit">Register</button>
-                    </div>
-
-                    <div>
-                        <button type="reset">Reset</button>
+                    <div style="margin-top: 20px;">
+                        <button type="submit" class="button primary">Register</button>
+                        <button type="reset" class="button">Reset</button>
                     </div>
             </form>
         </div>
     </main>
 
-    <!-- Footer -->
     <footer id="footer" class="wrapper alt">
         <div class="inner">
             <ul class="menu">
-                <li>&copy; Biscuit inc. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+                <li>&copy; Untitled. All rights reserved.</li>
             </ul>
         </div>
     </footer>
 
-    <script src="../assets/js/jquery.min.js"></script>
-    <script src="../assets/js/browser.min.js"></script>
-    <script src="../assets/js/breakpoints.min.js"></script>
-    <script src="../assets/js/util.js"></script>
-    <script src="../assets/js/main.js"></script>
-
-    <!-- Custom Auth Script -->
     <script src="../assets/js/auth.js"></script>
     <script>
-        // Handle Form Submit
         document.getElementById('registerForm').addEventListener('submit', function(e) {
-            e.preventDefault(); // Stop page from reloading
+            e.preventDefault(); 
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
-            registerUser(user, pass); // Call function from auth.js
+            const confirm = document.getElementById('confirmPW').value;
+            const role = document.getElementById('role').value; // Get the selected role
+
+            if(pass !== confirm) {
+                alert("Passwords do not match!");
+                return;
+            }
+
+            // Pass the role to the register function in auth.js
+            registerUser(user, pass, role); 
         });
     </script>
 </body>
