@@ -50,7 +50,7 @@ function loginUser(username, password) {
 // --- LOGOUT FUNCTION ---
 function logoutUser() {
     localStorage.removeItem(SESSION_KEY);
-    window.location.href = 'Home.html'; 
+    window.location.href = 'index.html'; 
 }
 
 // --- GET CURRENT USER ---
