@@ -683,11 +683,90 @@
             }
         }
         
-        /* CRITICAL: Hide the feedback button by default.
-           JavaScript checks if user is Admin and shows it. 
-        */
-        #feedback-global {
-            display: none; 
+        #feedback-global { display: none; }
+
+        /* --- Review & Comment Styles --- */
+        .vote-section {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            padding: 15px;
+            background: var(--bg);
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vote-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .vote-btn:hover { transform: scale(1.05); }
+        .vote-btn.up:hover { border-color: #4cd964; color: #4cd964; }
+        .vote-btn.down:hover { border-color: #ff3b30; color: #ff3b30; }
+
+        .comments-section {
+            margin-top: 20px;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+
+        .comments-list {
+            max-height: 200px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .comment-bubble {
+            background: var(--bg);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .comment-role-badge {
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #e5e7eb;
+            color: #374151;
+        }
+        .comment-role-badge.admin { background: var(--accent); color: white; }
+        .comment-role-badge.staff { background: #fcd34d; color: #78350f; }
+
+        .comment-input-area {
+            display: flex;
+            gap: 8px;
+        }
+
+        .comment-input-area input {
+            flex: 1;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
         }
     </style>
 </head>
@@ -736,7 +815,7 @@
             
             <div class="modal-overlay" id="feedbackModal">
                 <div class="modal-box">
-                    <div class="modal-header">Tell us what's here (Admin Only)</div>
+                    <div class="modal-header" id="addItemModalTitle">Add New Item</div>
                     
                     <div class="modal-form-group">
                         <label class="modal-label">Food Name</label>
@@ -807,6 +886,43 @@
 
                     <div class="modal-buttons">
                         <button class="modal-btn modal-btn-cancel" id="filterCloseBtn">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-overlay" id="reviewModal">
+                <div class="modal-box">
+                    <div class="modal-header" id="reviewTitle">Food Item Name</div>
+                    
+                    <div id="reviewImageContainer" style="margin-bottom:15px; display:none;">
+                        <img id="reviewImage" src="" style="width:100%; height:150px; object-fit:cover; border-radius:8px;">
+                    </div>
+
+                    <div class="tags" id="reviewTags"></div>
+
+                    <div class="vote-section">
+                        <button class="vote-btn up" id="btnUpvote">
+                            <span>👍</span> <span id="countUp">0</span>
+                        </button>
+                        <button class="vote-btn down" id="btnDownvote">
+                            <span>👎</span> <span id="countDown">0</span>
+                        </button>
+                    </div>
+
+                    <div class="comments-section">
+                        <h4 style="margin:0 0 10px 0; font-size:14px;">Comments</h4>
+                        <div class="comments-list" id="commentsList">
+                            <div style="text-align:center; color:gray; font-size:13px;">No comments yet.</div>
+                        </div>
+                        
+                        <div class="comment-input-area">
+                            <input type="text" id="newCommentInput" placeholder="Add a comment...">
+                            <button class="modal-btn modal-btn-submit" id="submitCommentBtn" style="flex:0 0 auto;">Post</button>
+                        </div>
+                    </div>
+
+                    <div class="modal-buttons" style="margin-top:15px;">
+                        <button class="modal-btn modal-btn-cancel" id="reviewCloseBtn">Close</button>
                     </div>
                 </div>
             </div>
@@ -940,6 +1056,9 @@
                 const currentUser = getCurrentUser();
                 const userRole = currentUser ? currentUser.role : 'base'; 
                 const isAdmin = (userRole === 'admin');
+                const isStudent = (userRole === 'student');
+                // Allow access if Admin OR Student
+                const canAddItem = (isAdmin || isStudent); 
 
                 // Attach Logout Listener
                 const logoutBtn = document.getElementById('logoutBtn');
@@ -954,9 +1073,9 @@
 
                 // Default Data
                 const defaultData = [
-                    { id: generateId(), name: "Potatoes", tags: ["vegetarian","keto"], source: "staff", locationId: 1 },
-                    { id: generateId(), name: "Porkchops", tags: ["pork","contains-gluten"], source: "staff", locationId: 1 },
-                    { id: generateId(), name: "Cheeseburger", tags: ["beef","contains-dairy"], source: "guest", locationId: 2 },
+                    { id: generateId(), name: "Potatoes", tags: ["vegetarian","keto"], source: "staff", locationId: 1, upvotes: 5, downvotes: 1, comments: [] },
+                    { id: generateId(), name: "Porkchops", tags: ["pork","contains-gluten"], source: "staff", locationId: 1, upvotes: 2, downvotes: 0, comments: [] },
+                    { id: generateId(), name: "Cheeseburger", tags: ["beef","contains-dairy"], source: "guest", locationId: 2, upvotes: 10, downvotes: 2, comments: [] },
                 ];
 
                 let allFoodItems = [];
@@ -1034,10 +1153,22 @@
                 function applyUserPermissions() {
                     const feedbackBtn = document.getElementById('feedback-global');
                     const adminDebugSection = document.getElementById('adminDebugSection');
+                    const addItemModalTitle = document.getElementById('addItemModalTitle');
 
-                    if (isAdmin) {
-                        if(feedbackBtn) feedbackBtn.style.display = 'block';
-                        if(adminDebugSection) adminDebugSection.style.display = 'block';
+                    if (canAddItem) {
+                        if(feedbackBtn) {
+                            feedbackBtn.style.display = 'block';
+                            if(isAdmin) {
+                                feedbackBtn.textContent = "Add Item";
+                                if(addItemModalTitle) addItemModalTitle.textContent = "Add New Item (Admin)";
+                            } else {
+                                feedbackBtn.textContent = "Tell us what's here";
+                                if(addItemModalTitle) addItemModalTitle.textContent = "Tell us what's here";
+                            }
+                        }
+                        
+                        // Debug section is exclusively for Admins
+                        if(adminDebugSection) adminDebugSection.style.display = isAdmin ? 'block' : 'none';
                     } else {
                         if(feedbackBtn) feedbackBtn.style.display = 'none';
                         if(adminDebugSection) adminDebugSection.style.display = 'none';
@@ -1081,6 +1212,23 @@
                 let modalSelectedLocation = null;
                 let isSearchMode = false;
 
+                // --- REVIEW SYSTEM VARIABLES ---
+                const reviewModal = document.getElementById('reviewModal');
+                const reviewTitle = document.getElementById('reviewTitle');
+                const reviewTags = document.getElementById('reviewTags');
+                const reviewImageContainer = document.getElementById('reviewImageContainer');
+                const reviewImage = document.getElementById('reviewImage');
+                const countUp = document.getElementById('countUp');
+                const countDown = document.getElementById('countDown');
+                const btnUpvote = document.getElementById('btnUpvote');
+                const btnDownvote = document.getElementById('btnDownvote');
+                const commentsList = document.getElementById('commentsList');
+                const newCommentInput = document.getElementById('newCommentInput');
+                const submitCommentBtn = document.getElementById('submitCommentBtn');
+                const reviewCloseBtn = document.getElementById('reviewCloseBtn');
+                
+                let currentReviewItemId = null;
+
                 document.querySelector('.bottom-menu').addEventListener('click', (e) => {
                     // Handle Delete
                     if (e.target.classList.contains('food-item-delete')) {
@@ -1098,7 +1246,7 @@
                         return;
                     }
 
-                    // Handle Selection
+                    // Handle Selection (Opens Review Modal)
                     const foodItem = e.target.closest('.food-item');
                     if (foodItem) {
                          const menuArray = foodItem.closest('.menu-array');
@@ -1113,6 +1261,121 @@
                          removeActiveState();
                          if (locationButtons[locationIndex]) locationButtons[locationIndex].classList.add('active');
                          if (mapMarkers[locationIndex]) mapMarkers[locationIndex].classList.add('active');
+
+                         // OPEN REVIEW MODAL
+                         const itemId = foodItem.dataset.id;
+                         openReviewModal(itemId);
+                    }
+                });
+
+                function openReviewModal(id) {
+                    const item = allFoodItems.find(i => i.id === id);
+                    if(!item) return;
+
+                    currentReviewItemId = id;
+                    
+                    // Initialize new data fields if they don't exist yet
+                    if(!item.upvotes) item.upvotes = 0;
+                    if(!item.downvotes) item.downvotes = 0;
+                    if(!item.comments) item.comments = [];
+
+                    // UI Population
+                    reviewTitle.textContent = item.name;
+                    
+                    if(item.image) {
+                        reviewImage.src = item.image;
+                        reviewImageContainer.style.display = 'block';
+                    } else {
+                        reviewImageContainer.style.display = 'none';
+                    }
+
+                    reviewTags.innerHTML = item.tags.map(tag => {
+                        const label = tag.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                        return `<span class="tag">${label}</span>`;
+                    }).join('');
+
+                    updateReviewStats(item);
+                    renderComments(item);
+
+                    reviewModal.classList.add('active');
+                }
+
+                function updateReviewStats(item) {
+                    countUp.textContent = item.upvotes;
+                    countDown.textContent = item.downvotes;
+                }
+
+                function renderComments(item) {
+                    commentsList.innerHTML = '';
+                    if(item.comments.length === 0) {
+                        commentsList.innerHTML = '<div style="text-align:center; color:gray; font-size:13px; padding:10px;">No comments yet.</div>';
+                        return;
+                    }
+
+                    item.comments.forEach(c => {
+                        const div = document.createElement('div');
+                        div.className = 'comment-bubble';
+                        const roleClass = c.role === 'admin' ? 'admin' : (c.role === 'staff' ? 'staff' : '');
+                        
+                        div.innerHTML = `
+                            <div class="comment-header">
+                                <span class="comment-role-badge ${roleClass}">${c.role || 'Guest'}</span>
+                                <span>${new Date(c.date).toLocaleDateString()}</span>
+                            </div>
+                            <div>${c.text}</div>
+                        `;
+                        commentsList.appendChild(div);
+                    });
+                    
+                    // Auto scroll to bottom
+                    commentsList.scrollTop = commentsList.scrollHeight;
+                }
+
+                // Vote Handlers
+                btnUpvote.addEventListener('click', () => handleVote('up'));
+                btnDownvote.addEventListener('click', () => handleVote('down'));
+
+                function handleVote(type) {
+                    const item = allFoodItems.find(i => i.id === currentReviewItemId);
+                    if(!item) return;
+
+                    if(type === 'up') item.upvotes++;
+                    if(type === 'down') item.downvotes++;
+
+                    saveData();
+                    updateReviewStats(item);
+                }
+
+                // Comment Handler
+                submitCommentBtn.addEventListener('click', () => {
+                    const text = newCommentInput.value.trim();
+                    if(!text) return;
+
+                    const item = allFoodItems.find(i => i.id === currentReviewItemId);
+                    if(!item) return;
+
+                    item.comments.push({
+                        text: text,
+                        role: userRole, 
+                        date: new Date().toISOString()
+                    });
+
+                    newCommentInput.value = '';
+                    saveData();
+                    renderComments(item);
+                });
+
+                // Close Handler
+                reviewCloseBtn.addEventListener('click', () => {
+                    reviewModal.classList.remove('active');
+                    currentReviewItemId = null;
+                });
+
+                // Close modal when clicking outside
+                reviewModal.addEventListener('click', (e) => {
+                    if (e.target === reviewModal) {
+                        reviewModal.classList.remove('active');
+                        currentReviewItemId = null;
                     }
                 });
 
@@ -1139,11 +1402,11 @@
                     filterItems();
                 }
 
-                // Feedback Modal Logic
+                // Feedback/Add Item Modal Logic
                 if (feedbackBtn) {
                     feedbackBtn.addEventListener('click', () => {
-                        if (!isAdmin) {
-                            alert("Only administrators can add items.");
+                        if (!canAddItem) {
+                            alert("You do not have permission to add items.");
                             return;
                         }
                         feedbackModal.classList.add('active');
@@ -1207,14 +1470,21 @@
                         const locationIndex = modalSelectedLocation;
 
                         if (foodName && selectedTagsArray.length > 0 && locationIndex !== null) {
+                            // Determine Source based on User Role
+                            // If admin -> staff, if student -> student.
+                            const itemSource = (userRole === 'admin') ? 'staff' : 'student';
+
                             // Create Data Object
                             const newItem = {
                                 id: generateId(),
                                 name: foodName,
                                 tags: selectedTagsArray,
                                 locationId: locationIndex + 1, // Store as 1-based index
-                                source: 'staff', // Force source to Staff since only Admins can add
-                                image: selectedImage
+                                source: itemSource, 
+                                image: selectedImage,
+                                upvotes: 0,
+                                downvotes: 0,
+                                comments: []
                             };
 
                             // Add to Data Array
